@@ -3,897 +3,654 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DWeb Camp 2026 — Power Plan</title>
+<title>DWeb Camp 2026 — Power Grid Map</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
-
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap');
   :root {
-    --bg: #0d0f0e;
-    --surface: #141714;
-    --border: #2a2e2b;
-    --accent: #7cfc6e;
-    --accent-dim: #3a6e33;
-    --warn: #f5a623;
-    --danger: #e8453c;
-    --text: #cdd5c8;
-    --muted: #6b7568;
-    --gen: #e8453c;
-    --util: #7cfc6e;
-    --hybrid: #f5a623;
+    --bg:#0b0d0b; --surface:#131513; --border:#252825;
+    --util:#5ee84e; --util-dim:#1f4a1a;
+    --new:#4a9eff; --new-dim:#0d2a4a;
+    --gen:#e8453c; --gen-dim:#3d120f;
+    --warn:#f5a623; --warn-dim:#3d2808;
+    --muted:#5a6558; --text:#bfc8ba;
+    --building:#1e2420; --building-b:#2e3830;
+    --area-fill:rgba(100,160,90,0.06); --area-b:rgba(100,160,90,0.18);
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'IBM Plex Sans', monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    padding: 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
+  * { box-sizing:border-box; margin:0; padding:0 }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; overflow:hidden; height:100vh; display:flex; flex-direction:column }
 
   header {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:.7rem 1.2rem; border-bottom:1px solid var(--border);
+    background:var(--surface); flex-shrink:0; gap:1rem; flex-wrap:wrap;
   }
+  .title { font-size:13px; font-weight:700; color:var(--util); letter-spacing:.05em }
+  .rev { font-size:10px; color:var(--muted); margin-top:1px }
 
-  .site-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
+  .controls { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap }
+  .btn {
+    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700;
+    letter-spacing:.08em; padding:4px 10px; border-radius:2px; cursor:pointer;
+    border:1px solid; transition:all .15s; user-select:none;
   }
+  .btn-util { border-color:var(--util); color:var(--util); background:var(--util-dim) }
+  .btn-util.off { background:transparent; color:var(--muted); border-color:var(--muted) }
+  .btn-new  { border-color:var(--new);  color:var(--new);  background:var(--new-dim) }
+  .btn-new.off  { background:transparent; color:var(--muted); border-color:var(--muted) }
+  .btn-gen  { border-color:var(--gen);  color:var(--gen);  background:var(--gen-dim) }
+  .btn-gen.off  { background:transparent; color:var(--muted); border-color:var(--muted) }
+  .btn-labels { border-color:#555; color:#999; background:#1a1a1a }
+  .btn-labels.off { background:transparent; color:var(--muted); border-color:var(--muted) }
 
-  h1 {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-  }
+  .map-container { flex:1; overflow:hidden; position:relative }
+  svg { width:100%; height:100%; cursor:grab }
+  svg.dragging { cursor:grabbing }
 
-  .subtitle {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 0.3rem;
-  }
-
-  h2 {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid var(--accent-dim);
-  }
-
-  section { margin-bottom: 2.5rem; }
-
-  .assumptions {
-    background: #0a1309;
-    border: 1px solid var(--accent-dim);
-    border-left: 3px solid var(--accent);
-    padding: 1rem 1.2rem;
-    border-radius: 2px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
-  .assumptions strong { color: var(--text); }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  thead th {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0.4rem 0.8rem;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-  }
-
-  tbody tr { border-bottom: 1px solid #1c201d; }
-  tbody tr:hover { background: #161b16; }
-
-  td { padding: 0.55rem 0.8rem; vertical-align: top; }
-
-  .mono { font-family: 'IBM Plex Mono', monospace; }
-  .muted { color: var(--muted); font-size: 12px; }
-  .bold { font-weight: 600; }
-
-  .badge {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    padding: 2px 6px;
-    border-radius: 2px;
-  }
-  .badge-util   { background: #1a3318; color: var(--util); }
-  .badge-gen    { background: #2e100e; color: var(--gen); }
-  .badge-hybrid { background: #2e1f07; color: var(--warn); }
-
-  .kw-low  { color: var(--util); font-family: 'IBM Plex Mono', monospace; }
-  .kw-mid  { color: var(--warn); font-family: 'IBM Plex Mono', monospace; }
-  .kw-high { color: var(--gen);  font-family: 'IBM Plex Mono', monospace; }
-
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .summary-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1rem;
-    border-radius: 2px;
-  }
-  .summary-box .label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.4rem;
-  }
-  .summary-box .value {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 1.6rem;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .summary-box .unit { font-size: 12px; color: var(--muted); margin-left: 4px; }
-  .summary-box .note { font-size: 11px; color: var(--muted); margin-top: 0.3rem; }
-
-  .hub-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .hub-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1rem 1.2rem;
-    border-radius: 2px;
-  }
-  .hub-card.pink-hub  { border-top: 2px solid var(--accent); }
-  .hub-card.guest-hub { border-top: 2px solid var(--warn); }
-
-  .hub-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.3rem;
-  }
-  .hub-spec {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 0.6rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .hub-kva {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .hub-child {
-    font-size: 12px;
-    color: var(--muted);
-    padding: 0.2rem 0;
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #1c201d;
-  }
-  .hub-child:last-child { border-bottom: none; }
-  .hub-child-name { color: var(--text); }
-
-  .area-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.7rem;
-    border-radius: 2px;
-    display: grid;
-    grid-template-columns: 240px 1fr auto;
-    gap: 1rem;
-    align-items: start;
-  }
-  .area-card.gen    { border-left: 3px solid var(--gen); }
-  .area-card.util   { border-left: 3px solid var(--util); }
-  .area-card.hybrid { border-left: 3px solid var(--warn); }
-
-  .area-name {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.2rem;
-  }
-  .area-detail { font-size: 12px; color: var(--muted); }
-  .area-source { font-size: 12px; color: var(--muted); line-height: 1.8; }
-  .area-kw { text-align: right; white-space: nowrap; }
-  .area-kw .range { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; }
-  .area-kw .label { font-size: 11px; color: var(--muted); }
-
-  .gen-card {
-    background: #1a0d0c;
-    border: 1px solid #3d1a18;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.7rem;
-    border-radius: 2px;
-  }
-  .gen-card h3 {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--gen);
-    margin-bottom: 0.4rem;
-  }
-  .gen-card p { font-size: 12px; color: var(--muted); margin-bottom: 0.4rem; }
-  .gen-card strong { color: var(--text); }
-
-  .crit {
-    background: #1a1308;
-    border: 1px solid #4a3010;
-    border-left: 3px solid var(--warn);
-    padding: 0.8rem 1rem;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 0.7rem;
-    border-radius: 2px;
-  }
-  .crit strong { color: var(--warn); }
-
-  .ok-note {
-    background: #0d1f0d;
-    border: 1px solid var(--accent-dim);
-    border-left: 3px solid var(--accent);
-    padding: 0.8rem 1rem;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 0.7rem;
-    border-radius: 2px;
-  }
-  .ok-note strong { color: var(--accent); }
-
+  /* Legend */
   .legend {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    position:absolute; bottom:1rem; left:1rem;
+    background:rgba(13,15,13,.9); border:1px solid var(--border);
+    padding:.8rem 1rem; border-radius:2px; font-size:10px; line-height:1.9;
   }
-  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
-  .legend-dot  { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-row { display:flex; align-items:center; gap:.5rem; color:var(--muted) }
+  .legend-line { width:22px; height:3px; border-radius:1px; flex-shrink:0 }
+  .legend-line-dashed { width:22px; height:0; border-top:2px dashed; flex-shrink:0 }
+  .legend-dot-sm { width:8px; height:8px; border-radius:50%; flex-shrink:0 }
 
-  footer {
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
+  /* Tooltip */
+  #tooltip {
+    position:absolute; pointer-events:none; display:none;
+    background:rgba(10,14,10,.97); border:1px solid var(--border);
+    border-left:3px solid var(--util); padding:.6rem .9rem;
+    font-size:11px; max-width:240px; border-radius:2px; z-index:10; line-height:1.7;
+  }
+  #tooltip .tt-title { color:var(--util); font-weight:700; margin-bottom:.2rem }
+  #tooltip .tt-row { color:var(--muted) }
+  #tooltip .tt-val { color:var(--text) }
+
+  /* Scale bar */
+  .scale-bar {
+    position:absolute; bottom:1rem; right:1rem;
+    background:rgba(13,15,13,.85); border:1px solid var(--border);
+    padding:.5rem .8rem; font-size:10px; color:var(--muted);
   }
 
-  @media (max-width: 750px) {
-    .area-card { grid-template-columns: 1fr; }
-    .hub-grid  { grid-template-columns: 1fr; }
-    h1 { font-size: 1.4rem; }
+  /* zoom controls */
+  .zoom-controls {
+    position:absolute; top:1rem; right:1rem;
+    display:flex; flex-direction:column; gap:.3rem;
   }
+  .zoom-btn {
+    width:28px; height:28px; background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-size:16px; cursor:pointer; display:flex; align-items:center;
+    justify-content:center; border-radius:2px; line-height:1;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .zoom-btn:hover { border-color:var(--util); color:var(--util) }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="site-label">Alte Hölle, Brandenburg · DWeb Camp 2026 · Power Planning Document · rev 0.2</div>
-  <h1>⚡ Power Plan</h1>
-  <div class="subtitle">850 people · woodland site · E.DIS utility grid (250kVA) + on-site 40kVA backup generator</div>
+  <div>
+    <div class="title">⚡ DWeb Camp 2026 — Power Grid Map</div>
+    <div class="rev">Alte Hölle, Brandenburg · rev 0.3 · Scroll/drag to navigate · hover elements for details</div>
+  </div>
+  <div class="controls">
+    <span style="font-size:10px;color:var(--muted);margin-right:.3rem">LAYERS:</span>
+    <button class="btn btn-util" id="tog-util" onclick="toggleLayer('util')">EXISTING INFRA</button>
+    <button class="btn btn-new" id="tog-new" onclick="toggleLayer('new')">EVENT RUNS (NEW)</button>
+    <button class="btn btn-gen" id="tog-gen" onclick="toggleLayer('gen')">GENERATORS</button>
+    <button class="btn btn-labels" id="tog-labels" onclick="toggleLayer('labels')">LABELS</button>
+  </div>
 </header>
 
-<div class="assumptions">
-  <strong>Assumptions &amp; method —</strong>
-  3-phase figures: 400V × I × √3 × cos φ (0.8). 3-phase 32A ≈ 22kW usable. 3-phase 63A ≈ 35kW usable.
-  Single-phase 16A = 3.7kW. Parking Schuko 10A = 2.3kW.
-  Diversity factors: camping 0.15–0.2, event tents 0.6–0.8, talks/workshop stage 0.8.
-  Stage loads reflect talks + workshops only — no concert PA, no moving light rigs.
-  Schematic source: site electrical drawing (E.DIS Dyn5 transformer → KVS/ZAS).
+<div class="map-container" id="mapContainer">
+<svg id="map" viewBox="0 0 960 720" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <pattern id="grid-pat" width="50" height="50" patternUnits="userSpaceOnUse">
+    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#181d18" stroke-width=".5"/>
+  </pattern>
+  <marker id="arrow-util" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L6,3 z" fill="#5ee84e" opacity=".6"/>
+  </marker>
+  <marker id="arrow-new" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L6,3 z" fill="#4a9eff" opacity=".8"/>
+  </marker>
+  <marker id="arrow-gen" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L6,3 z" fill="#e8453c" opacity=".8"/>
+  </marker>
+  <filter id="glow-util">
+    <feGaussianBlur stdDeviation="2" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="glow-gen">
+    <feGaussianBlur stdDeviation="3" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<!-- Background grid -->
+<rect width="960" height="720" fill="#0b0d0b"/>
+<rect width="960" height="720" fill="url(#grid-pat)"/>
+
+<!-- ═══════════════════════════════════════════════
+     TERRAIN / AREAS
+═══════════════════════════════════════════════ -->
+
+<!-- Property boundary -->
+<rect x="15" y="15" width="930" height="690" fill="none" stroke="#2a2e2a" stroke-width="1" stroke-dasharray="8,4"/>
+
+<!-- Road "Alte Hölle" -->
+<path d="M 468,720 L 468,430 Q 472,340 488,295 L 510,240 L 530,165 L 545,95"
+      fill="none" stroke="#2a3028" stroke-width="22"/>
+<path d="M 468,720 L 468,430 Q 472,340 488,295 L 510,240 L 530,165 L 545,95"
+      fill="none" stroke="#354035" stroke-width="18"/>
+<path d="M 468,720 L 468,430 Q 472,340 488,295 L 510,240 L 530,165 L 545,95"
+      fill="none" stroke="#3e4a3a" stroke-width="2" stroke-dasharray="12,8"/>
+
+<!-- Große Zeltwiese (large camping) -->
+<ellipse cx="148" cy="285" rx="118" ry="90" fill="rgba(60,100,50,0.08)" stroke="rgba(100,160,80,0.15)" stroke-width="1" stroke-dasharray="6,4"/>
+
+<!-- Kleine Zeltwiese (small camping) -->
+<ellipse cx="308" cy="368" rx="80" ry="65" fill="rgba(60,100,50,0.06)" stroke="rgba(100,160,80,0.12)" stroke-width="1" stroke-dasharray="6,4"/>
+
+<!-- Pool area -->
+<rect x="516" y="432" width="70" height="42" rx="4" fill="#0d2030" stroke="#1a4060" stroke-width="1.5"/>
+
+<!-- Forest areas (right side) -->
+<ellipse cx="648" cy="510" rx="52" ry="38" fill="rgba(30,60,20,0.15)" stroke="rgba(60,100,40,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+<ellipse cx="682" cy="590" rx="42" ry="32" fill="rgba(30,60,20,0.12)" stroke="rgba(60,100,40,0.18)" stroke-width="1" stroke-dasharray="4,4"/>
+
+<!-- Camper parking areas -->
+<rect x="572" y="72" width="130" height="55" rx="2" fill="rgba(40,50,35,0.12)" stroke="#2a3528" stroke-width="1" stroke-dasharray="4,3"/>
+<rect x="748" y="78" width="90" height="48" rx="2" fill="rgba(40,50,35,0.10)" stroke="#2a3528" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- ═══════════════════════════════════════════════
+     EXISTING UTILITY INFRASTRUCTURE  (layer: util)
+═══════════════════════════════════════════════ -->
+<g id="layer-util">
+
+  <!-- E.DIS Transformer node (off-site, at bottom) -->
+  <!-- Cable: E.DIS → Rosa Haus (NAYY 4×240, 80m) -->
+  <path class="cable-hover" data-tip="E.DIS → Rosa Haus" data-spec="NAYY 4×240 · 80m · 250A" data-kw="154kVA supply"
+    d="M 448,710 L 375,568"
+    stroke="#5ee84e" stroke-width="3.5" fill="none" filter="url(#glow-util)" opacity=".85" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: E.DIS → Gasthaus (NAYY 4×120, 220m) — long diagonal run -->
+  <path class="cable-hover" data-tip="E.DIS → Gasthaus" data-spec="NAYY 4×120 · 220m · 125A" data-kw="69kVA supply"
+    d="M 448,710 Q 500,620 552,328"
+    stroke="#f5a623" stroke-width="3" fill="none" opacity=".8" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: Rosa Haus → Rote Scheune (NAYY 5×35, 25m) -->
+  <path class="cable-hover" data-tip="Rosa Haus → Rote Scheune" data-spec="NAYY 5×35 · 25m · 35A" data-kw="~24kW available"
+    d="M 375,568 L 322,552"
+    stroke="#5ee84e" stroke-width="2" fill="none" opacity=".7" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: Gasthaus → Generator Garage (NAYY 4×50, 50m) -->
+  <path class="cable-hover" data-tip="Gasthaus → Generator Garage" data-spec="NAYY 4×50 · 50m · 80A" data-kw="40kVA backup"
+    d="M 552,328 L 518,268"
+    stroke="#e8453c" stroke-width="2.5" fill="none" opacity=".75" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: Gasthaus → Bier Scheune (NAYY 4×25, 50m) -->
+  <path class="cable-hover" data-tip="Gasthaus → Bier Scheune" data-spec="NAYY 4×25 · 50m · 35A" data-kw="~5kW usable"
+    d="M 552,328 L 492,228"
+    stroke="#f5a623" stroke-width="2" fill="none" opacity=".7" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: Gasthaus → Hotel (NAYY 4×25, 175m) -->
+  <path class="cable-hover" data-tip="Gasthaus → Hotel" data-spec="NAYY 4×25 · 175m · 50A" data-kw="Sauna only — 0kW event"
+    d="M 552,328 L 652,165"
+    stroke="#f5a623" stroke-width="2" fill="none" opacity=".5" stroke-dasharray="5,3" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: Gasthaus → Heizhaus (NAYY 4×25, 80m) -->
+  <path class="cable-hover" data-tip="Gasthaus → Heizhaus" data-spec="NAYY 4×25 · 80m · 63A" data-kw="~15kW after well/heating"
+    d="M 552,328 L 782,202"
+    stroke="#f5a623" stroke-width="2.5" fill="none" opacity=".7" marker-end="url(#arrow-util)"/>
+
+  <!-- Cable: Heizhaus → Pool (NAYY 4×50, 90m) -->
+  <path class="cable-hover" data-tip="Heizhaus → Pool Area" data-spec="NAYY 4×50 · 90m · 35A feeder" data-kw="24kW hard ceiling"
+    d="M 782,202 L 556,444"
+    stroke="#f5a623" stroke-width="2" fill="none" opacity=".65" marker-end="url(#arrow-util)"/>
+</g>
+
+<!-- ═══════════════════════════════════════════════
+     NEW EVENT CABLE RUNS  (layer: new)
+═══════════════════════════════════════════════ -->
+<g id="layer-new">
+
+  <!-- Rosa Haus → Glamping (250m, 2×32A, 6mm²) -->
+  <path class="cable-hover" data-tip="Rosa Haus → Glamping Dist. Box" data-spec="2×32A (3ph) · ~250m · 6mm² required" data-kw="44kW ceiling · vendor-distributed"
+    d="M 375,568 Q 280,480 148,290"
+    stroke="#4a9eff" stroke-width="2.5" fill="none" stroke-dasharray="10,5" opacity=".85" marker-end="url(#arrow-new)"/>
+
+  <!-- Rosa Haus → Self-camping board (150m, 1×32A) -->
+  <path class="cable-hover" data-tip="Rosa Haus → Self-Camping Poles (×10)" data-spec="1×32A (3ph) · ~150m · 4mm²" data-kw="22kW max · 10–15kW typical"
+    d="M 375,568 Q 330,490 265,378"
+    stroke="#4a9eff" stroke-width="2" fill="none" stroke-dasharray="8,4" opacity=".7" marker-end="url(#arrow-new)"/>
+
+  <!-- Rosa Haus → Small camp tents (100m, 1×32A) -->
+  <path class="cable-hover" data-tip="Rosa Haus → Small Camp Tents (×3)" data-spec="1×32A (3ph) · ~100m · 4mm²" data-kw="22kW max · 9–15kW typical"
+    d="M 375,568 Q 350,490 310,372"
+    stroke="#4a9eff" stroke-width="2" fill="none" stroke-dasharray="8,4" opacity=".6" marker-end="url(#arrow-new)"/>
+
+  <!-- Gasthaus → Hacker Tent (100m, 1×32A) — CONFIRMED ROUTING -->
+  <path class="cable-hover" data-tip="Gasthaus → Hacker Tent ✓" data-spec="1×32A (3ph) · ~100m · 4mm²" data-kw="22kW max · 9–20kW typical · RESOLVED"
+    d="M 552,328 L 596,195"
+    stroke="#4a9eff" stroke-width="3" fill="none" stroke-dasharray="10,4" opacity=".9" filter="url(#glow-util)" marker-end="url(#arrow-new)"/>
+
+  <!-- Gasthaus → Forest Locations (200m, 1×32A) — PREFERRED EAST-SIDE ROUTING -->
+  <path class="cable-hover" data-tip="Gasthaus → Forest Locations (×2)" data-spec="1×32A (3ph) · ~200m · 4mm² H07RN-F" data-kw="Y-board at midpoint · 10–14kW combined · EAST-SIDE ROUTING"
+    d="M 552,328 Q 600,420 650,515"
+    stroke="#4a9eff" stroke-width="2" fill="none" stroke-dasharray="8,5" opacity=".7" marker-end="url(#arrow-new)"/>
+
+  <!-- ALT: Rote Scheune → Forest (cross-road, secondary option) -->
+  <path class="cable-hover" data-tip="ALT: Rote Scheune → Forest (road crossing)" data-spec="32A (3ph) · H07RN-F · road crossing required" data-kw="Alt route if Gasthaus 32A committed elsewhere"
+    d="M 322,552 Q 420,560 648,510"
+    stroke="#4a9eff" stroke-width="1.5" fill="none" stroke-dasharray="4,6" opacity=".35" marker-end="url(#arrow-new)"/>
+
+  <!-- Pool area internal dist (existing outlets, just shown) -->
+  <path class="cable-hover" data-tip="Pool → Event Tents + Dome" data-spec="CEE32A + 3×CEE16A + Schuko16A at pool outside" data-kw="Existing outlets · 24kW ceiling"
+    d="M 556,444 Q 590,450 638,455"
+    stroke="#4a9eff" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity=".55" marker-end="url(#arrow-new)"/>
+</g>
+
+<!-- ═══════════════════════════════════════════════
+     GENERATORS  (layer: gen)
+═══════════════════════════════════════════════ -->
+<g id="layer-gen">
+
+  <!-- On-site generator (already exists, at garage near Gasthaus) -->
+  <!-- Generator Garage node marked in buildings -->
+  <!-- Standalone mode cable to hacker tent (alt to Gasthaus run) -->
+  <path class="cable-hover" data-tip="ALT: Generator → Hacker Tent (standalone)" data-spec="CEE 32A output · ~150m from gen garage" data-kw="32kW available · use if Gasthaus 32A needed elsewhere"
+    d="M 518,268 L 596,195"
+    stroke="#e8453c" stroke-width="2" fill="none" stroke-dasharray="6,4" opacity=".6" marker-end="url(#arrow-gen)"/>
+
+  <!-- Rental generator → Camper Parking (placed centrally) -->
+  <path class="cable-hover" data-tip="Rental Gen (50kVA) → Camper Parking Dist. Board" data-spec="~50m to dist. board · 25×CEE16A · one RCD per van" data-kw="22–35kW load · silent canopy essential"
+    d="M 806,78 Q 760,98 700,100"
+    stroke="#e8453c" stroke-width="2.5" fill="none" stroke-dasharray="8,4" opacity=".75" marker-end="url(#arrow-gen)"/>
+</g>
+
+<!-- ═══════════════════════════════════════════════
+     BUILDINGS / NODES
+═══════════════════════════════════════════════ -->
+
+<!-- E.DIS Transformer (off-map) -->
+<g class="node-hover" data-tip="E.DIS Transformer" data-spec="250kVA · Dyn5 · 20kV/0.4kV" data-kw="Two feeds: Rosa Haus (80m 4×240) + Gasthaus (220m 4×120)">
+  <rect x="414" y="695" width="68" height="26" rx="2" fill="#1a2010" stroke="#4a6a30" stroke-width="1.5"/>
+  <text x="448" y="712" text-anchor="middle" font-size="9" fill="#7cfc6e" font-weight="700">E.DIS 250kVA</text>
+</g>
+
+<!-- Rosa Haus (Pink House) — PRIMARY HUB -->
+<g class="node-hover" data-tip="Rosa Haus — PRIMARY HUB" data-spec="250A · 154kVA · NAYY 4×240 80m" data-kw="123kW usable · NO backup · extendable">
+  <rect x="342" y="548" width="68" height="40" rx="2" fill="#0f2210" stroke="#5ee84e" stroke-width="2"/>
+  <rect x="342" y="548" width="68" height="6" rx="2" fill="#5ee84e" opacity=".4"/>
+  <circle cx="413" cy="568" r="6" fill="#5ee84e" filter="url(#glow-util)"/>
+  <text x="376" y="564" text-anchor="middle" font-size="9" fill="#5ee84e" font-weight="700">ROSA HAUS</text>
+  <text x="376" y="578" text-anchor="middle" font-size="8" fill="#3a8a30">154kVA · 250A</text>
+  <text x="376" y="589" text-anchor="middle" font-size="7.5" fill="#2a6020">NO BACKUP</text>
+</g>
+
+<!-- Rote Scheune -->
+<g class="node-hover" data-tip="Rote Scheune (Barn)" data-spec="35A · NAYY 5×35 25m from Rosa Haus" data-kw="CEE32A + CEE16A + Schuko16A · ~24kW">
+  <rect x="290" y="535" width="58" height="36" rx="2" fill="#1a1f14" stroke="#3a4a2a" stroke-width="1.5"/>
+  <text x="319" y="549" text-anchor="middle" font-size="9" fill="#8ab870" font-weight="600">ROTE</text>
+  <text x="319" y="560" text-anchor="middle" font-size="9" fill="#8ab870" font-weight="600">SCHEUNE</text>
+  <text x="319" y="571" text-anchor="middle" font-size="7.5" fill="#4a6038">35A · 24kW</text>
+</g>
+
+<!-- Gasthaus — SECONDARY HUB -->
+<g class="node-hover" data-tip="Gasthaus — SECONDARY HUB" data-spec="125A · 69kVA · NAYY 4×120 220m · 32A event outlet present" data-kw="55kW usable · HAS 40kVA gen backup">
+  <rect x="518" y="305" width="72" height="46" rx="2" fill="#1f1a0a" stroke="#f5a623" stroke-width="2"/>
+  <rect x="518" y="305" width="72" height="6" rx="2" fill="#f5a623" opacity=".35"/>
+  <circle cx="592" cy="328" r="6" fill="#f5a623" opacity=".9"/>
+  <text x="554" y="321" text-anchor="middle" font-size="9" fill="#f5a623" font-weight="700">GASTHAUS</text>
+  <text x="554" y="333" text-anchor="middle" font-size="8" fill="#a07018">69kVA · 125A</text>
+  <text x="554" y="344" text-anchor="middle" font-size="7.5" fill="#6a5010">+40kVA GEN</text>
+  <text x="554" y="353" text-anchor="middle" font-size="7.5" fill="#3a8a30">32A avail.</text>
+</g>
+
+<!-- Generator Garage -->
+<g class="node-hover" data-tip="Generator Garage (40kVA)" data-spec="NAYY 4×50 · 50m · 80A · manual transfer" data-kw="CEE32A + 2×CEE16A + Schuko · backup OR standalone">
+  <rect x="492" y="254" width="56" height="32" rx="2" fill="#200c0c" stroke="#6e2a20" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <circle cx="548" cy="270" r="5" fill="#e8453c" filter="url(#glow-gen)" opacity=".9"/>
+  <text x="520" y="266" text-anchor="middle" font-size="8.5" fill="#e8453c" font-weight="700">GEN 40kVA</text>
+  <text x="520" y="277" text-anchor="middle" font-size="7.5" fill="#8a3020">manual switch</text>
+  <text x="520" y="287" text-anchor="middle" font-size="7" fill="#5a2015">backup/standalone</text>
+</g>
+
+<!-- Bier Scheune -->
+<g class="node-hover" data-tip="Bier Scheune" data-spec="35A · NAYY 4×25 50m from Gasthaus" data-kw="CEE16A + 2×Schuko10A(!) · ~5kW · RV checkin here">
+  <rect x="462" y="210" width="62" height="32" rx="2" fill="#1a1f14" stroke="#3a4a2a" stroke-width="1.5"/>
+  <text x="493" y="223" text-anchor="middle" font-size="9" fill="#8ab870" font-weight="600">BIER SCHEUNE</text>
+  <text x="493" y="234" text-anchor="middle" font-size="7.5" fill="#4a6038">CEE16A · 2×10A Schuko</text>
+  <text x="493" y="244" text-anchor="middle" font-size="7" fill="#3a5028">~5kW · RV checkin</text>
+</g>
+
+<!-- Hotel -->
+<g class="node-hover" data-tip="Hotel" data-spec="50A · NAYY 4×25 175m · Sauna 14kVA" data-kw="NO free event outlets · Nurse room + Library + Chill-out inside">
+  <rect x="618" y="148" width="72" height="42" rx="2" fill="#1a1616" stroke="#4a2a2a" stroke-width="1.5"/>
+  <text x="654" y="162" text-anchor="middle" font-size="9" fill="#b87878" font-weight="700">HOTEL</text>
+  <text x="654" y="174" text-anchor="middle" font-size="7.5" fill="#6a3a3a">Sauna 14kVA only</text>
+  <text x="654" y="185" text-anchor="middle" font-size="7" fill="#4a2a2a">NO event outlets</text>
+  <text x="654" y="194" text-anchor="middle" font-size="7" fill="#5a4a4a">nurse/library/chill</text>
+</g>
+
+<!-- Large Hacker Tent -->
+<g class="node-hover" data-tip="Large Hacker Tent" data-spec="~100m from Gasthaus · 32A (3ph)" data-kw="9–20kW · talks + workshops + hacking · RESOLVED: Gasthaus feed">
+  <rect x="566" y="175" width="80" height="34" rx="2" fill="#0d1a28" stroke="#4a9eff" stroke-width="2" stroke-dasharray="5,2"/>
+  <circle cx="648" cy="192" r="5" fill="#4a9eff" opacity=".8"/>
+  <text x="606" y="189" text-anchor="middle" font-size="9" fill="#4a9eff" font-weight="700">HACKER TENT</text>
+  <text x="606" y="200" text-anchor="middle" font-size="7.5" fill="#2a6aa0">32A · Gasthaus ~100m</text>
+  <text x="606" y="210" text-anchor="middle" font-size="7" fill="#1a4a72">⟵ main program</text>
+</g>
+
+<!-- Heizhaus -->
+<g class="node-hover" data-tip="Heizhaus (Infra)" data-spec="63A · NAYY 4×25 80m from Gasthaus · CEE32A + CEE16A" data-kw="Well + heating priority · ~15kW for main stage">
+  <rect x="752" y="184" width="68" height="38" rx="2" fill="#1a1f14" stroke="#3a4a2a" stroke-width="1.5"/>
+  <text x="786" y="198" text-anchor="middle" font-size="9" fill="#8ab870" font-weight="600">HEIZHAUS</text>
+  <text x="786" y="209" text-anchor="middle" font-size="7.5" fill="#4a6038">CEE32A + CEE16A</text>
+  <text x="786" y="220" text-anchor="middle" font-size="7" fill="#3a5028">~15kW event avail.</text>
+</g>
+
+<!-- Main Stage + Auditorium -->
+<g class="node-hover" data-tip="Main Stage + Auditorium" data-spec="Heizhaus CEE32A (stage) + CEE16A (auditorium)" data-kw="11–23kW combined · talks only · NO generator needed">
+  <rect x="732" y="262" width="78" height="38" rx="2" fill="#0d1a28" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="5,2"/>
+  <text x="771" y="276" text-anchor="middle" font-size="9" fill="#7ab8f0" font-weight="600">MAIN STAGE</text>
+  <text x="771" y="287" text-anchor="middle" font-size="7.5" fill="#3a7ab0">+ AUDITORIUM</text>
+  <text x="771" y="298" text-anchor="middle" font-size="7" fill="#2a5a80">Heizhaus 32A+16A</text>
+</g>
+
+<!-- Pool -->
+<g class="node-hover" data-tip="Pool (Becken-Keller)" data-spec="CEE32A + 3×CEE16A + Schuko16A outside" data-kw="35A feeder ceiling = 24kW total · 4 tents + 8m dome">
+  <rect x="516" y="432" width="70" height="44" rx="3" fill="#0a1822" stroke="#1a4866" stroke-width="1.5"/>
+  <text x="551" y="448" text-anchor="middle" font-size="9" fill="#5a9ac0" font-weight="700">POOL</text>
+  <text x="551" y="460" text-anchor="middle" font-size="7.5" fill="#2a5a80">35A feeder = 24kW</text>
+  <text x="551" y="471" text-anchor="middle" font-size="7" fill="#1a3a58">CEE32A+3×16A+Schuko</text>
+</g>
+
+<!-- 8m Dome (near pool) -->
+<g class="node-hover" data-tip="8m Dome" data-spec="Pool outlet CEE16A" data-kw="~3kW · from pool sub-board">
+  <circle cx="640" cy="458" r="14" fill="#0d1820" stroke="#1a3860" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="640" y="453" text-anchor="middle" font-size="8" fill="#4a80b0">8m</text>
+  <text x="640" y="464" text-anchor="middle" font-size="8" fill="#4a80b0">DOME</text>
+</g>
+
+<!-- Food/Bar area -->
+<g class="node-hover" data-tip="Food Terrace + Food Garden + Bar + Coffee Truck" data-spec="Gas cooking · bars + coffee need power" data-kw="5–10kW · Gasthaus CEE16A or pool spare">
+  <rect x="528" y="358" width="80" height="30" rx="2" fill="#1a1810" stroke="#3a3818" stroke-width="1"/>
+  <text x="568" y="370" text-anchor="middle" font-size="8.5" fill="#b0a060" font-weight="600">FOOD + BAR</text>
+  <text x="568" y="381" text-anchor="middle" font-size="7" fill="#6a6030">gas+bar+coffee · 5–10kW</text>
+</g>
+
+<!-- Glamping area label -->
+<g>
+  <text x="148" y="265" text-anchor="middle" font-size="10" fill="#4a7038" font-weight="700">GLAMPING</text>
+  <text x="148" y="278" text-anchor="middle" font-size="8.5" fill="#3a5828">30 tents · 100 guests</text>
+  <text x="148" y="290" text-anchor="middle" font-size="8" fill="#2a4020">44kW ceiling · 6mm²</text>
+  <text x="148" y="302" text-anchor="middle" font-size="8" fill="#2a4020">Dist. box from Rosa Haus</text>
+</g>
+
+<!-- Self-camping label -->
+<g>
+  <text x="308" y="345" text-anchor="middle" font-size="9.5" fill="#4a7038" font-weight="700">SELF-CAMPING</text>
+  <text x="308" y="357" text-anchor="middle" font-size="8" fill="#3a5828">300 tents · 10 poles</text>
+  <text x="308" y="368" text-anchor="middle" font-size="7.5" fill="#2a4020">22kW · Rosa Haus 32A</text>
+</g>
+
+<!-- Small camp / chillout tents -->
+<g>
+  <text x="254" y="415" text-anchor="middle" font-size="8.5" fill="#4a6838">SMALL CAMP</text>
+  <text x="254" y="426" text-anchor="middle" font-size="7.5" fill="#3a5028">chillout + 2 theme tents</text>
+  <text x="254" y="437" text-anchor="middle" font-size="7" fill="#2a4020">9–15kW · Rosa Haus 32A</text>
+</g>
+
+<!-- Showers/Washing station -->
+<g class="node-hover" data-tip="Showers + Washing Station" data-spec="Cold outdoor showers confirmed — electrical load: minimal" data-kw="~1–2kW for lighting only · no electric heating planned">
+  <circle cx="218" cy="442" r="12" fill="#0d1820" stroke="#1a3040" stroke-width="1.5"/>
+  <text x="218" y="438" text-anchor="middle" font-size="7.5" fill="#4a7080">WAS H</text>
+  <text x="218" y="448" text-anchor="middle" font-size="7.5" fill="#4a7080">STAT.</text>
+  <text x="246" y="452" font-size="7" fill="#2a4050">cold shower · ~1kW</text>
+</g>
+
+<!-- Forest location 1 -->
+<g class="node-hover" data-tip="Forest Location 1 — Stage" data-spec="East side · ~200m from Gasthaus" data-kw="PA 3–5kW + lighting 3–4kW · H07RN-F cable · 7–10kW">
+  <text x="648" y="500" text-anchor="middle" font-size="9" fill="#5a8850" font-weight="600">FOREST</text>
+  <text x="648" y="512" text-anchor="middle" font-size="8" fill="#4a7040">STAGE</text>
+  <text x="648" y="524" text-anchor="middle" font-size="7.5" fill="#3a5830">7–10kW</text>
+</g>
+
+<!-- Forest location 2 -->
+<g class="node-hover" data-tip="Forest Location 2 — Party Sound" data-spec="East side · branch from forest stage dist. board" data-kw="Sound system · ~3.7kW · CEE16A branch">
+  <text x="682" y="580" text-anchor="middle" font-size="9" fill="#5a8850" font-weight="600">FOREST</text>
+  <text x="682" y="592" text-anchor="middle" font-size="8" fill="#4a7040">PARTY</text>
+  <text x="682" y="604" text-anchor="middle" font-size="7.5" fill="#3a5830">~3.7kW CEE16A</text>
+</g>
+
+<!-- Pool event tents -->
+<g>
+  <text x="600" y="418" font-size="8" fill="#4a7080">4×50m² tents</text>
+  <text x="600" y="428" font-size="7.5" fill="#3a5060">pool sub-board</text>
+</g>
+
+<!-- RV Camper Parking (top) -->
+<g class="node-hover" data-tip="RV/Camper Parking (main)" data-spec="~25 vans · needs 25×CEE16A hookup" data-kw="22–35kW · rental 50kVA gen · silent canopy">
+  <text x="637" y="88" text-anchor="middle" font-size="9.5" fill="#b08850" font-weight="700">RV / CAMPER PARKING</text>
+  <text x="637" y="100" text-anchor="middle" font-size="8" fill="#806030">25 vans · 50kVA rental gen</text>
+  <text x="637" y="112" text-anchor="middle" font-size="7.5" fill="#604820">CEE16A per van · silent canopy</text>
+</g>
+
+<!-- Rental Generator for campers -->
+<g id="layer-gen" class="node-hover" data-tip="Rental Generator 50kVA (silent)" data-spec="For camper van parking · 25-slot CEE16A dist. board" data-kw="~22kW typical · silent canopy mandatory overnight">
+  <rect x="780" y="62" width="64" height="30" rx="2" fill="#200c0c" stroke="#6e2a20" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <circle cx="846" cy="77" r="5" fill="#e8453c" filter="url(#glow-gen)" opacity=".85"/>
+  <text x="812" y="73" text-anchor="middle" font-size="8.5" fill="#e8453c" font-weight="700">GEN 50kVA</text>
+  <text x="812" y="84" text-anchor="middle" font-size="7.5" fill="#8a3020">RENTAL · silent</text>
+</g>
+
+<!-- Camper parking right -->
+<g>
+  <text x="793" y="95" text-anchor="middle" font-size="8.5" fill="#806050">CAMPER</text>
+  <text x="793" y="106" text-anchor="middle" font-size="8.5" fill="#806050">PARKING</text>
+  <text x="793" y="117" text-anchor="middle" font-size="7.5" fill="#504030">extra area</text>
+</g>
+
+<!-- Registration / Entry area -->
+<g class="node-hover" data-tip="Registration + Security + Theme Tent" data-spec="Near Rosa Haus / Rote Scheune · short run" data-kw="Schuko 16A or CEE16A · 3–8kW combined">
+  <rect x="398" y="530" width="58" height="18" rx="2" fill="#151e12" stroke="#2a3820" stroke-width="1"/>
+  <text x="427" y="543" text-anchor="middle" font-size="8" fill="#6a8850">REGISTRATION</text>
+</g>
+
+<!-- Archery (no power) -->
+<text x="52" y="365" font-size="9" fill="#304028" font-style="italic">← archery</text>
+<text x="52" y="378" font-size="7.5" fill="#253020">no power</text>
+
+<!-- Road label -->
+<g id="layer-labels">
+  <text transform="translate(450,480) rotate(-78)" text-anchor="middle" font-size="9" fill="#3a4535" letter-spacing="2">"ALTE HÖLLE" ROAD</text>
+  <text x="448" y="680" text-anchor="middle" font-size="8" fill="#3a4535">↓ road access</text>
+</g>
+
+<!-- North arrow -->
+<g transform="translate(900,640)">
+  <line x1="0" y1="18" x2="0" y2="-18" stroke="#3a4a35" stroke-width="1.5"/>
+  <polygon points="0,-22 -4,-10 4,-10" fill="#5a7050"/>
+  <text x="0" y="30" text-anchor="middle" font-size="9" fill="#4a6040">N</text>
+</g>
+
+<!-- ═══ CABLE LABELS (layer: labels) ═══ -->
+<g id="layer-labels-cables">
+
+  <!-- Existing infra labels -->
+  <g class="lbl-util" fill="#3a6a30" font-size="8.5">
+    <text transform="translate(388,655) rotate(-52)" text-anchor="middle">4×240 · 80m</text>
+    <text transform="translate(496,548) rotate(-72)" text-anchor="middle" fill="#7a6020">4×120 · 220m</text>
+    <text transform="translate(344,560) rotate(-7)" text-anchor="middle">5×35 · 25m</text>
+    <text transform="translate(534,302) rotate(-60)" text-anchor="middle" fill="#7a3020">4×50 · 50m</text>
+    <text transform="translate(522,280) rotate(-56)" text-anchor="middle" fill="#7a6020">4×25 · 50m</text>
+    <text transform="translate(616,258) rotate(-38)" text-anchor="middle" fill="#505a48">4×25 · 175m</text>
+    <text transform="translate(682,268) rotate(-14)" text-anchor="middle" fill="#7a6020">4×25 · 80m</text>
+    <text transform="translate(688,352) rotate(-48)" text-anchor="middle" fill="#7a6020">4×50 · 90m</text>
+  </g>
+
+  <!-- New cable labels -->
+  <g class="lbl-new" fill="#2a5a8a" font-size="8">
+    <text transform="translate(222,430) rotate(-50)" text-anchor="middle">2×32A · 250m · 6mm²</text>
+    <text transform="translate(308,480) rotate(-65)" text-anchor="middle">32A · 150m</text>
+    <text transform="translate(565,260) rotate(-70)" text-anchor="middle">32A · ~100m ✓</text>
+    <text transform="translate(616,434) rotate(-60)" text-anchor="middle">32A · ~200m</text>
+  </g>
+</g>
+
+</svg>
+
+<!-- Tooltip -->
+<div id="tooltip">
+  <div class="tt-title" id="tt-title">—</div>
+  <div class="tt-row">Spec: <span class="tt-val" id="tt-spec">—</span></div>
+  <div class="tt-row">Load: <span class="tt-val" id="tt-kw">—</span></div>
 </div>
 
-<!-- GRID TOPOLOGY -->
-<section>
-  <h2>Grid Topology</h2>
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-row"><div class="legend-line" style="background:#5ee84e"></div> Existing utility infra (grid)</div>
+  <div class="legend-row"><div class="legend-line" style="background:#f5a623"></div> Existing sub-feeds (Gasthaus side)</div>
+  <div class="legend-row" style="margin-top:.3rem"><div class="legend-line-dashed" style="border-color:#4a9eff"></div> New event cable run (planned)</div>
+  <div class="legend-row"><div class="legend-line-dashed" style="border-color:#4a9eff;opacity:.4"></div> Alt route (secondary option)</div>
+  <div class="legend-row" style="margin-top:.3rem"><div class="legend-line-dashed" style="border-color:#e8453c"></div> Generator connection</div>
+  <div class="legend-row" style="margin-top:.4rem"><div class="legend-dot-sm" style="background:#5ee84e"></div> Grid hub (utility)</div>
+  <div class="legend-row"><div class="legend-dot-sm" style="background:#f5a623"></div> Grid hub (secondary)</div>
+  <div class="legend-row"><div class="legend-dot-sm" style="background:#e8453c"></div> Generator node</div>
+  <div class="legend-row"><div class="legend-dot-sm" style="background:#4a9eff"></div> Event area / load</div>
+</div>
 
-  <div class="hub-grid">
-    <div class="hub-card pink-hub">
-      <div class="hub-title">🟢 Pink House — Primary Hub</div>
-      <div class="hub-spec">NAYY 4×240 · 80m · 250A · 154kVA · <strong style="color:var(--gen)">NO backup</strong> · new installation</div>
-      <div class="hub-kva">154 kVA</div>
-      <div style="font-size:11px;color:var(--muted);margin:0.4rem 0 0.8rem">≈ 123kW usable @ cos φ 0.8</div>
-      <div class="hub-child"><span class="hub-child-name">KVS / ZAS Rosa Haus</span><span>250A main</span></div>
-      <div class="hub-child"><span class="hub-child-name">Event connections (extendable)</span><span>63A · 35A · 32A CEE available</span></div>
-      <div class="hub-child"><span class="hub-child-name">Barn (Scheune @ Rosa Haus)</span><span>NAYY 5×35 · 25m · 35A</span></div>
-    </div>
-    <div class="hub-card guest-hub">
-      <div class="hub-title">🟡 Guest House — Secondary Hub</div>
-      <div class="hub-spec">NAYY 4×120 · 220m · 125A · 69kVA · <strong style="color:var(--accent)">HAS backup (40kVA gen)</strong> · old installation</div>
-      <div class="hub-kva" style="color:var(--warn)">69 kVA</div>
-      <div style="font-size:11px;color:var(--muted);margin:0.4rem 0 0.8rem">≈ 55kW usable + 40kVA switchable gen</div>
-      <div class="hub-child"><span class="hub-child-name">Generator Garage (backup/standalone)</span><span>NAYY 4×50 · 50m · 80A</span></div>
-      <div class="hub-child"><span class="hub-child-name">Beer Barn</span><span>NAYY 4×25 · 50m · 35A</span></div>
-      <div class="hub-child"><span class="hub-child-name">Hotel</span><span>NAYY 4×25 · 175m · 50A</span></div>
-      <div class="hub-child"><span class="hub-child-name">Heizhaus (Infra)</span><span>NAYY 4×25 · 80m · 63A</span></div>
-      <div class="hub-child" style="padding-left:1rem"><span class="hub-child-name">↳ Pool area</span><span>NAYY 4×50 · 90m · 35A</span></div>
-    </div>
-  </div>
+<div class="scale-bar">
+  <svg width="80" height="22" style="display:block;margin-bottom:2px">
+    <line x1="5" y1="10" x2="75" y2="10" stroke="#5a6a55" stroke-width="1.5"/>
+    <line x1="5" y1="6" x2="5" y2="14" stroke="#5a6a55" stroke-width="1.5"/>
+    <line x1="75" y1="6" x2="75" y2="14" stroke="#5a6a55" stroke-width="1.5"/>
+    <line x1="40" y1="8" x2="40" y2="12" stroke="#5a6a55" stroke-width="1"/>
+    <text x="5" y="21" font-size="7" fill="#4a5a45" font-family="IBM Plex Mono,monospace">0</text>
+    <text x="33" y="21" font-size="7" fill="#4a5a45" font-family="IBM Plex Mono,monospace">~75m</text>
+    <text x="60" y="21" font-size="7" fill="#4a5a45" font-family="IBM Plex Mono,monospace">~150m</text>
+  </svg>
+  approx. scale
+</div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Location</th>
-        <th>Feed from</th>
-        <th>Fuse</th>
-        <th>Event-usable outlets</th>
-        <th>Avail. kW</th>
-        <th>Notes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="bold">Pink House (KVS)</td>
-        <td class="mono muted">Transformer, NAYY 4×240, 80m</td>
-        <td class="mono">250A</td>
-        <td>63A · 35A · 32A CEE · CEE32 · CEE16 · 2×Schuko 16A · extendable</td>
-        <td class="mono kw-low">≤123kW</td>
-        <td class="muted">Main event power hub. No backup.</td>
-      </tr>
-      <tr>
-        <td class="bold">Barn @ Pink House</td>
-        <td class="mono muted">Pink House, NAYY 5×35, 25m</td>
-        <td class="mono">35A</td>
-        <td>CEE 32A · CEE 16A · Schuko 16A</td>
-        <td class="mono kw-low">~24kW</td>
-        <td class="muted">Good source for forest area runs.</td>
-      </tr>
-      <tr>
-        <td class="bold">Guest House</td>
-        <td class="mono muted">Transformer, NAYY 4×120, 220m</td>
-        <td class="mono">125A</td>
-        <td>Distributes to sub-circuits below</td>
-        <td class="mono kw-mid">≤55kW</td>
-        <td class="muted">Old installation. Manual grid/gen transfer.</td>
-      </tr>
-      <tr>
-        <td class="bold">Generator Garage</td>
-        <td class="mono muted">Guest House, NAYY 4×50, 50m</td>
-        <td class="mono">80A</td>
-        <td>CEE 32A · 2×CEE 16A · Schuko 16A</td>
-        <td class="mono kw-mid">~32kW</td>
-        <td class="muted">40kVA unit. Backup or standalone mode.</td>
-      </tr>
-      <tr>
-        <td class="bold">Beer Barn</td>
-        <td class="mono muted">Guest House, NAYY 4×25, 50m</td>
-        <td class="mono">35A</td>
-        <td>CEE 16A · 2×Schuko 10A (collection pit/parking)</td>
-        <td class="mono kw-low">~5kW</td>
-        <td class="muted">Parking Schucos are 10A (2.3kW each), not 16A.</td>
-      </tr>
-      <tr>
-        <td class="bold">Hotel</td>
-        <td class="mono muted">Guest House, NAYY 4×25, 175m</td>
-        <td class="mono">50A</td>
-        <td style="color:var(--gen)">None — Sauna (14kVA) consumes circuit</td>
-        <td class="mono kw-high">0kW event</td>
-        <td class="muted">Hacker tent outside hotel has no grid feed. Needs own solution.</td>
-      </tr>
-      <tr>
-        <td class="bold">Heizhaus (Infra)</td>
-        <td class="mono muted">Guest House, NAYY 4×25, 80m</td>
-        <td class="mono">63A</td>
-        <td>CEE 32A · CEE 16A · (well + heating have priority)</td>
-        <td class="mono kw-low">~15kW event</td>
-        <td class="muted">After well/heating draw, ~15kW available for main stage.</td>
-      </tr>
-      <tr>
-        <td class="bold">Pool (outside)</td>
-        <td class="mono muted">Heizhaus, NAYY 4×50, 90m</td>
-        <td class="mono">35A</td>
-        <td>CEE 32A · 3×CEE 16A · Schuko 16A</td>
-        <td class="mono kw-low">~24kW total</td>
-        <td class="muted">35A feeder is hard ceiling regardless of outlet count.</td>
-      </tr>
-    </tbody>
-  </table>
-</section>
+<div class="zoom-controls">
+  <button class="zoom-btn" onclick="zoom(1.25)">+</button>
+  <button class="zoom-btn" onclick="zoom(0.8)">−</button>
+  <button class="zoom-btn" onclick="resetView()" title="Reset view" style="font-size:11px">⌂</button>
+</div>
 
-<!-- SUMMARY -->
-<section>
-  <h2>Overall Budget</h2>
-  <div class="summary-grid">
-    <div class="summary-box">
-      <div class="label">Pink House Utility</div>
-      <div class="value" style="color:var(--util)">~123<span class="unit">kW</span></div>
-      <div class="note">154kVA new install, no backup</div>
-    </div>
-    <div class="summary-box">
-      <div class="label">Guest House Utility</div>
-      <div class="value" style="color:var(--warn)">~55<span class="unit">kW</span></div>
-      <div class="note">69kVA old install, gen backup</div>
-    </div>
-    <div class="summary-box">
-      <div class="label">On-site Generator</div>
-      <div class="value" style="color:var(--gen)">40<span class="unit">kVA</span></div>
-      <div class="note">Manual transfer or standalone</div>
-    </div>
-    <div class="summary-box">
-      <div class="label">Estimated Typical Load</div>
-      <div class="value" style="color:var(--warn)">~115<span class="unit">kW</span></div>
-      <div class="note">With diversity, realistic operations</div>
-    </div>
-    <div class="summary-box">
-      <div class="label">Estimated Peak Load</div>
-      <div class="value" style="color:var(--gen)">~185<span class="unit">kW</span></div>
-      <div class="note">Simultaneous max draw</div>
-    </div>
-    <div class="summary-box">
-      <div class="label">Rental Generator</div>
-      <div class="value" style="color:var(--warn)">1×<span class="unit">unit</span></div>
-      <div class="note">~50kVA for camper vans</div>
-    </div>
-  </div>
+</div>
 
-  <div class="ok-note">
-    <strong>✓ Budget is manageable.</strong> Combined utility (178kW) comfortably covers typical load (~115kW). Peak may approach limits during evening hours when camping loads + event tents all run simultaneously, but diversity factors keep this realistic. Dropping electric showers and downgrading stages to talks/workshops removed ~100kW from the previous estimate.
-  </div>
-  <div class="crit">
-    <strong>⚠ Hacker tent has no grid feed.</strong> Hotel circuit (50A) serves sauna only, no usable outlets. The hacker tent needs a dedicated solution — either new cable run or on-site generator in standalone mode. This is the main open decision.
-  </div>
-  <div class="crit">
-    <strong>⚠ Pink house has no backup.</strong> A grid dropout takes down glamping, self-camping, forest, and small tent areas simultaneously. Single point of failure for the majority of the site.
-  </div>
-</section>
+<script>
+// Layer toggles
+const layers = {
+  util: ['layer-util'],
+  new: ['layer-new'],
+  gen: ['layer-gen'],
+  labels: ['layer-labels', 'layer-labels-cables']
+};
+const layerState = { util: true, new: true, gen: true, labels: true };
 
-<!-- AREA PLAN -->
-<section>
-  <h2>Distribution Plan — Area by Area</h2>
+function toggleLayer(key) {
+  layerState[key] = !layerState[key];
+  const btn = document.getElementById('tog-' + key);
+  btn.classList.toggle('off', !layerState[key]);
+  const ids = layers[key];
+  ids.forEach(id => {
+    document.querySelectorAll('#' + id).forEach(el => {
+      el.style.display = layerState[key] ? '' : 'none';
+    });
+  });
+}
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--util)"></div> Utility (grid)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--gen)"></div> Generator</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div> Decision pending / hybrid</div>
-  </div>
+// Tooltip
+const tooltip = document.getElementById('tooltip');
+document.querySelectorAll('.cable-hover, .node-hover').forEach(el => {
+  el.style.cursor = 'pointer';
+  el.addEventListener('mouseenter', (e) => {
+    document.getElementById('tt-title').textContent = el.dataset.tip || '—';
+    document.getElementById('tt-spec').textContent = el.dataset.spec || '—';
+    document.getElementById('tt-kw').textContent = el.dataset.kw || '—';
+    tooltip.style.display = 'block';
+    const color = el.dataset.tip && el.dataset.tip.includes('→') ?
+      (el.classList.contains('cable-hover') ? (el.getAttribute('stroke') === '#4a9eff' ? '#4a9eff' : el.getAttribute('stroke') === '#e8453c' ? '#e8453c' : '#f5a623') : '#f5a623')
+      : '#7cfc6e';
+    tooltip.style.borderLeftColor = el.closest('[stroke]') ? (el.getAttribute('stroke') || '#7cfc6e') : '#7cfc6e';
+  });
+  el.addEventListener('mousemove', (e) => {
+    const rect = document.getElementById('mapContainer').getBoundingClientRect();
+    let x = e.clientX - rect.left + 15;
+    let y = e.clientY - rect.top + 15;
+    if (x + 250 > rect.width) x = e.clientX - rect.left - 255;
+    if (y + 90 > rect.height) y = e.clientY - rect.top - 95;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  });
+  el.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
+  });
+});
 
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Glamping (30 tents)</div>
-      <div class="area-detail">~100 guests · vendor-managed · 2×32A total for all tents</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Pink House — 2×32A (3ph CEE)</strong> = 44kW hard ceiling to vendor distribution box. Vendor distributes internally across all 30 tents — confirm they use RCDs per cluster.<br>
-      Cable run: ~250m. Use <strong>6mm²</strong> — at 250m a 4mm² cable gives ~3.5% voltage drop, borderline. 6mm² brings it under 3%.<br>
-      Typical draw with 30-tent diversity (0.3–0.5): 13–22kW.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">13–22 kW</div>
-      <div class="label">typical · 44kW max</div>
-    </div>
-  </div>
+// Pan + zoom
+const svg = document.getElementById('map');
+let viewBox = { x: 0, y: 0, w: 960, h: 720 };
+let dragging = false, startX, startY, startVB;
 
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Self-Camping Poles (×10)</div>
-      <div class="area-detail">Up to 300 BYOT tents</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Pink House — 1×32A (3ph)</strong> = 22kW, distributed to 10 poles via central board in camping area.<br>
-      Each pole: 2–4×Schuko 16A, RCD per pole. Phone charging, small lights, no cooking.<br>
-      Diversity ~0.15 → realistic 10–15kW.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">10–15 kW</div>
-      <div class="label">typical draw</div>
-    </div>
-  </div>
+svg.addEventListener('mousedown', e => {
+  dragging = true;
+  startX = e.clientX; startY = e.clientY;
+  startVB = { ...viewBox };
+  svg.classList.add('dragging');
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const svgRect = svg.getBoundingClientRect();
+  const scaleX = viewBox.w / svgRect.width;
+  const scaleY = viewBox.h / svgRect.height;
+  viewBox.x = startVB.x - (e.clientX - startX) * scaleX;
+  viewBox.y = startVB.y - (e.clientY - startY) * scaleY;
+  applyViewBox();
+});
+window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('dragging'); });
 
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Small Camp — Chillout + 2×50m² Tents</div>
-      <div class="area-detail">3 structures</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Pink House — 1×32A (3ph)</strong> = 22kW shared, via small distribution board.<br>
-      Each structure: LED lighting 1–2kW + small PA/ambient 1–2kW + misc 1kW = 3–5kW. Total 9–15kW, comfortably within circuit.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">9–15 kW</div>
-      <div class="label">typical draw</div>
-    </div>
-  </div>
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 1.1 : 0.9;
+  const svgRect = svg.getBoundingClientRect();
+  const mx = (e.clientX - svgRect.left) / svgRect.width * viewBox.w + viewBox.x;
+  const my = (e.clientY - svgRect.top) / svgRect.height * viewBox.h + viewBox.y;
+  viewBox.w *= factor; viewBox.h *= factor;
+  viewBox.x = mx - (e.clientX - svgRect.left) / svgRect.width * viewBox.w;
+  viewBox.y = my - (e.clientY - svgRect.top) / svgRect.height * viewBox.h;
+  viewBox.w = Math.max(200, Math.min(1920, viewBox.w));
+  viewBox.h = Math.max(150, Math.min(1440, viewBox.h));
+  applyViewBox();
+}, { passive: false });
 
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Forest — Stage + Party Sound</div>
-      <div class="area-detail">2 locations · no Naturschutz issues</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Barn @ Pink House — CEE 32A (3ph)</strong> for forest stage + CEE 16A for party sound.<br>
-      Forest stage (talks): PA 3–5kW + projector 1kW + lighting 3–4kW = 7–10kW.<br>
-      Party sound: CEE 16A = 3.7kW max — sufficient without heavy subs.<br>
-      Cable: H07RN-F outdoor rated, conduit at path crossings.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">10–14 kW</div>
-      <div class="label">combined draw</div>
-    </div>
-  </div>
+function zoom(factor) {
+  const cx = viewBox.x + viewBox.w / 2;
+  const cy = viewBox.y + viewBox.h / 2;
+  viewBox.w *= factor; viewBox.h *= factor;
+  viewBox.w = Math.max(200, Math.min(1920, viewBox.w));
+  viewBox.h = Math.max(150, Math.min(1440, viewBox.h));
+  viewBox.x = cx - viewBox.w / 2;
+  viewBox.y = cy - viewBox.h / 2;
+  applyViewBox();
+}
 
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Pool Area — 4×50m² Tents + Dome</div>
-      <div class="area-detail">Events, workshops · 5 structures</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Pool outside connections</strong> via Heizhaus → 35A feeder = <strong>24kW hard ceiling</strong>.<br>
-      Outlets available: CEE 32A + 3×CEE 16A + Schuko 16A. Theoretical 37kW — but feeder limits all of it to 24kW. Use sub-board to distribute fairly across 5 structures.<br>
-      Per structure (talks load): ~3–4kW. 5×4kW = 20kW — feasible, no margin for heavy extras.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-mid">15–24 kW</div>
-      <div class="label">at feeder ceiling</div>
-    </div>
-  </div>
+function resetView() {
+  viewBox = { x: 0, y: 0, w: 960, h: 720 };
+  applyViewBox();
+}
 
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Food Garden + Bar + Coffee Truck</div>
-      <div class="area-detail">Gas cooking outdoors · bar + coffee only electrical</div>
-    </div>
-    <div class="area-source">
-      Food garden: <strong>gas confirmed</strong>, no electric cooking. Lighting + misc only = 1–2kW.<br>
-      Bar: refrigeration 1–2kW + lighting 0.5kW + POS 0.2kW = 2–3kW.<br>
-      Coffee truck: confirm if self-powered or needs a CEE 16A grid hookup (3–5kW if so).<br>
-      Best fed from a spare CEE 16A at the pool sub-board, or a short run from guest house if proximity works.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">5–10 kW</div>
-      <div class="label">typical draw</div>
-    </div>
-  </div>
-
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Beer Barn + Parking Schuko</div>
-      <div class="area-detail">Light loads only</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Guest House → Beer Barn 35A feed</strong>.<br>
-      Barn: CEE 16A = 3.7kW. Taps, lighting, POS.<br>
-      Parking: 2×Schuko <strong>10A</strong> (2.3kW each) at collection pit — enough for 2 vans or misc equipment, not more.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">2–5 kW</div>
-      <div class="label">typical draw</div>
-    </div>
-  </div>
-
-  <div class="area-card util">
-    <div>
-      <div class="area-name">Main Stage (Heizhaus Area)</div>
-      <div class="area-detail">Talks + workshops · no concert PA</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Heizhaus CEE 32A</strong> = 22kW available after well + heating take their share of the 63A feeder.<br>
-      Talks/workshop load: PA 2–5kW + projector(s) 1–2kW + laptop cluster 3–6kW + LED lighting 3–5kW = <strong>9–18kW total</strong>.<br>
-      <span style="color:var(--accent)">Confirmed: this circuit covers the main stage comfortably. No generator needed here.</span>
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">9–18 kW</div>
-      <div class="label">typical draw</div>
-    </div>
-  </div>
-
-  <div class="area-card hybrid">
-    <div>
-      <div class="area-name">Hacker Tent (outside Hotel)</div>
-      <div class="area-detail">Main program tent · talks, workshops, hacking</div>
-    </div>
-    <div class="area-source">
-      <strong>DECISION REQUIRED.</strong> Hotel circuit (50A, 175m) serves sauna only — no usable outlets for events.<br>
-      <strong>Option A — New cable run:</strong> Guest House → hacker tent, dedicated 32A (3ph), ~175–200m. Clean grid power, ~22kW available. Cost: 4mm² cable + labor + distribution board.<br>
-      <strong>Option B — On-site gen standalone:</strong> Use 40kVA generator in standalone mode (disconnected from guest house transfer), route its CEE 32A directly to hacker tent. Guest house side continues on grid. ~32kW available. Works if grid is reliable.<br>
-      Load: PA 2–5kW + projectors 1–2kW + laptops 3–8kW + lighting 3–5kW = <strong>9–20kW</strong>. Either option has headroom.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-low">9–20 kW</div>
-      <div class="label">typical draw</div>
-    </div>
-  </div>
-
-  <div class="area-card gen">
-    <div>
-      <div class="area-name">Camper Van Parking (~25 vans)</div>
-      <div class="area-detail">Around hotel · overnight hookups</div>
-    </div>
-    <div class="area-source">
-      Source: <strong>Rental generator ~50kVA.</strong><br>
-      Existing parking Schuko outlets (10A, 2 units) cover 2 vans maximum. For 25 vans: need dedicated 16A CEE hookup per van with a distribution board.<br>
-      Cable run from pink house (~300m+) would require heavy cable and is not practical. Generator on-site is the cleanest solution.<br>
-      Van draw: ~0.8–2kW typical (heating, charging). 25 vans × 1.5kW × diversity 0.6 = <strong>~22kW realistic</strong>. 50kVA gives safe margin.
-    </div>
-    <div class="area-kw">
-      <div class="range kw-mid">20–35 kW</div>
-      <div class="label">typical · van-dependent</div>
-    </div>
-  </div>
-</section>
-
-<!-- GENERATOR SITUATION -->
-<section>
-  <h2>Generator Situation</h2>
-
-  <div class="gen-card">
-    <h3>ON-SITE: 40kVA Backup Generator (Generator Garage)</h3>
-    <p>Connected via NAYY 4×50, 50m, 80A to guest house with <strong>manual transfer switch</strong>. Either grid or generator feeds the guest house side — not both. Direct outputs: <strong>CEE 32A + 2×CEE 16A + Schuko 16A</strong>.</p>
-    <p><strong>Normal operation:</strong> grid feeds guest house, generator on standby backup. <strong>Standalone mode:</strong> generator outputs used directly for hacker tent, guest house continues on grid via transfer switch set to grid side. Valid approach if E.DIS supply is reliable.</p>
-  </div>
-
-  <div class="gen-card">
-    <h3>RENTAL: ~50kVA Silent — Camper Van Parking</h3>
-    <p>Required for 25-van hookup area. Position at camper parking near hotel. Feed a 25-slot CEE 16A distribution board (one RCD per van). <strong>Silent canopy — overnight operation near sleeping guests.</strong> 48h+ fuel tank preferred for unattended overnight running.</p>
-  </div>
-
-  <div class="ok-note">
-    <strong>✓ Only one rental generator likely needed.</strong> With talks/workshop loads on both stages and the on-site 40kVA gen handling the hacker tent, the only remaining gap is the van parking area. This is a significant reduction from earlier estimates.
-  </div>
-
-  <div class="crit">
-    <strong>⚠ If hacker tent uses on-site gen (Option B):</strong> guest house side loses its backup coverage during that time. A grid outage on the guest house feed takes down beer barn, pool area, main stage, food garden, and hotel simultaneously with no fallback. Assess E.DIS reliability for the area or negotiate a second manual transfer point with site owner.
-  </div>
-</section>
-
-<!-- CABLE RUNS -->
-<section>
-  <h2>Notable Event Cable Runs</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>From</th>
-        <th>To</th>
-        <th>Distance</th>
-        <th>Circuit</th>
-        <th>Min. Cable</th>
-        <th>Notes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="mono">Pink House</td>
-        <td class="mono">Glamping dist. box</td>
-        <td class="mono">~250m</td>
-        <td class="mono kw-mid">2×32A (3ph)</td>
-        <td class="mono bold">6mm²</td>
-        <td class="muted">4mm² gives 3.5% drop at 250m — borderline. Use 6mm². Road/path crossings need cable ramps.</td>
-      </tr>
-      <tr>
-        <td class="mono">Pink House</td>
-        <td class="mono">Self-camping board</td>
-        <td class="mono">~150m</td>
-        <td class="mono kw-low">1×32A (3ph)</td>
-        <td class="mono">4mm²</td>
-        <td class="muted">Central board, then 10 shorter pole drops.</td>
-      </tr>
-      <tr>
-        <td class="mono">Pink House</td>
-        <td class="mono">Small camp dist.</td>
-        <td class="mono">~100m</td>
-        <td class="mono kw-low">1×32A (3ph)</td>
-        <td class="mono">4mm²</td>
-        <td class="muted">Chillout + 2 theme tents from one board.</td>
-      </tr>
-      <tr>
-        <td class="mono">Barn @ Pink House</td>
-        <td class="mono">Forest stage</td>
-        <td class="mono">~150m</td>
-        <td class="mono kw-low">32A (3ph)</td>
-        <td class="mono">4mm² H07RN-F</td>
-        <td class="muted">Outdoor rated. Route clear. Conduit at crossings.</td>
-      </tr>
-      <tr>
-        <td class="mono">Guest House (Option A)</td>
-        <td class="mono">Hacker Tent</td>
-        <td class="mono">~175–200m</td>
-        <td class="mono kw-low">1×32A (3ph)</td>
-        <td class="mono">4mm²</td>
-        <td class="muted">If Option A chosen. Alt: use on-site gen standalone (Option B).</td>
-      </tr>
-    </tbody>
-  </table>
-</section>
-
-<!-- LOAD SUMMARY -->
-<section>
-  <h2>Load Summary</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Area</th>
-        <th>Source</th>
-        <th>Hub</th>
-        <th>Typ kW</th>
-        <th>Peak kW</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="bold">Glamping (vendor, 30 tents)</td>
-        <td class="mono muted">Pink House 2×32A</td>
-        <td><span class="badge badge-util">PINK</span></td>
-        <td class="mono kw-low">15</td>
-        <td class="mono kw-mid">44</td>
-      </tr>
-      <tr>
-        <td class="bold">Self-camping poles (×10)</td>
-        <td class="mono muted">Pink House 1×32A</td>
-        <td><span class="badge badge-util">PINK</span></td>
-        <td class="mono kw-low">12</td>
-        <td class="mono kw-low">20</td>
-      </tr>
-      <tr>
-        <td class="bold">Small camp tents (×3)</td>
-        <td class="mono muted">Pink House 1×32A</td>
-        <td><span class="badge badge-util">PINK</span></td>
-        <td class="mono kw-low">10</td>
-        <td class="mono kw-low">15</td>
-      </tr>
-      <tr>
-        <td class="bold">Forest stage + party sound</td>
-        <td class="mono muted">Barn CEE32 + CEE16</td>
-        <td><span class="badge badge-util">PINK</span></td>
-        <td class="mono kw-low">10</td>
-        <td class="mono kw-low">14</td>
-      </tr>
-      <tr>
-        <td class="bold">Pool area (4 tents + dome)</td>
-        <td class="mono muted">Heizhaus→Pool 35A</td>
-        <td><span class="badge badge-hybrid">GUEST</span></td>
-        <td class="mono kw-low">15</td>
-        <td class="mono kw-mid">24</td>
-      </tr>
-      <tr>
-        <td class="bold">Food garden + bar + coffee</td>
-        <td class="mono muted">Guest house side / pool tap</td>
-        <td><span class="badge badge-hybrid">GUEST</span></td>
-        <td class="mono kw-low">5</td>
-        <td class="mono kw-low">10</td>
-      </tr>
-      <tr>
-        <td class="bold">Beer barn + parking Schuko</td>
-        <td class="mono muted">Beer Barn 35A feed</td>
-        <td><span class="badge badge-hybrid">GUEST</span></td>
-        <td class="mono kw-low">2</td>
-        <td class="mono kw-low">5</td>
-      </tr>
-      <tr>
-        <td class="bold">Main stage (Heizhaus)</td>
-        <td class="mono muted">Heizhaus CEE 32A</td>
-        <td><span class="badge badge-hybrid">GUEST</span></td>
-        <td class="mono kw-low">12</td>
-        <td class="mono kw-low">18</td>
-      </tr>
-      <tr>
-        <td class="bold">Hacker tent</td>
-        <td class="mono muted">40kVA gen or new 32A run</td>
-        <td><span class="badge badge-gen">TBD</span></td>
-        <td class="mono kw-low">12</td>
-        <td class="mono kw-low">20</td>
-      </tr>
-      <tr>
-        <td class="bold">Camper vans (×25)</td>
-        <td class="mono muted">~50kVA rental gen</td>
-        <td><span class="badge badge-gen">GEN</span></td>
-        <td class="mono kw-low">22</td>
-        <td class="mono kw-mid">35</td>
-      </tr>
-      <tr style="border-top:2px solid var(--border)">
-        <td class="bold">Pink House subtotal</td>
-        <td class="muted" colspan="2">154kVA available (≤123kW)</td>
-        <td class="mono kw-low bold">47</td>
-        <td class="mono kw-mid bold">93</td>
-      </tr>
-      <tr>
-        <td class="bold">Guest House subtotal</td>
-        <td class="muted" colspan="2">69kVA available (≤55kW)</td>
-        <td class="mono kw-low bold">34</td>
-        <td class="mono kw-mid bold">57</td>
-      </tr>
-      <tr style="border-top:2px solid var(--accent-dim)">
-        <td class="bold">TOTAL</td>
-        <td class="muted" colspan="2">178kW utility + 32–50kW gen</td>
-        <td class="mono kw-low bold">115</td>
-        <td class="mono kw-mid bold">185</td>
-      </tr>
-    </tbody>
-  </table>
-</section>
-
-<!-- OPEN QUESTIONS -->
-<section>
-  <h2>Open Questions / Action Items</h2>
-  <table>
-    <thead>
-      <tr><th>#</th><th>Item</th><th>Priority</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="mono muted">1</td>
-        <td><strong>Hacker tent power source:</strong> Option A (new 32A cable run ~200m from guest house) or Option B (40kVA gen standalone). Decision gates procurement. Cable Option A is cleaner and restores backup function to guest house; gen Option B is faster to set up.</td>
-        <td><span class="badge badge-gen">CRITICAL</span></td>
-      </tr>
-      <tr>
-        <td class="mono muted">2</td>
-        <td><strong>Glamping vendor confirmation:</strong> verify their internal distribution plan, RCDs per cluster, and whether 2×32A request is 3-phase CEE 5-pin or single-phase. Also confirm their acceptance of a 250m cable run with vendor-end distribution board.</td>
-        <td><span class="badge badge-gen">CRITICAL</span></td>
-      </tr>
-      <tr>
-        <td class="mono muted">3</td>
-        <td><strong>50kVA silent generator rental</strong> for camper van parking. Confirm van count, hookup standard (CEE 16A blue = standard EU), and overnight noise restrictions on site.</td>
-        <td><span class="badge badge-hybrid">HIGH</span></td>
-      </tr>
-      <tr>
-        <td class="mono muted">4</td>
-        <td><strong>Food/bar/coffee power routing:</strong> nearest available circuit is pool sub-board (already at 24kW ceiling) or a new tap from guest house. Confirm headroom once pool tent loads are finalized.</td>
-        <td><span class="badge badge-hybrid">HIGH</span></td>
-      </tr>
-      <tr>
-        <td class="mono muted">5</td>
-        <td><strong>Glamping cable: procure 6mm² in sufficient length.</strong> Do not substitute 4mm² for the 250m run — voltage drop will be out of spec at full load.</td>
-        <td><span class="badge badge-hybrid">HIGH</span></td>
-      </tr>
-      <tr>
-        <td class="mono muted">6</td>
-        <td><strong>Pink house backup resilience:</strong> no generator backup exists for the new installation side. Discuss with site owner whether a manual transfer option can be added. Not strictly required but eliminates the main single point of failure.</td>
-        <td><span class="badge badge-util">MEDIUM</span></td>
-      </tr>
-      <tr>
-        <td class="mono muted">7</td>
-        <td><strong>Coffee truck:</strong> confirm self-contained or needs grid hookup (CEE 16A, 3–5kW). Affects food garden sub-board sizing.</td>
-        <td><span class="badge badge-util">LOW</span></td>
-      </tr>
-    </tbody>
-  </table>
-</section>
-
-<footer>
-  DWeb Camp 2026 Power Plan · rev 0.2 · Alte Hölle, Brandenburg · For planning purposes only.
-  All temporary installations require a qualified Elektrofachkraft (EFK) per VDE 0100-718 (Veranstaltungstechnik) and DGUV V3 inspection before energisation.
-  Generator overnight: check with Forstamt re noise / emissions requirements.
-</footer>
-
+function applyViewBox() {
+  svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+}
+</script>
 </body>
 </html>
