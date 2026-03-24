@@ -2,7 +2,7 @@
 
 Power planning document for [DWeb Camp 2026](https://dwebcamp.org).
 
-Published at: https://your-org.github.io/power (replace with actual URL after first deploy)
+Published at: https://l5yth.github.io/hoellenstrom/
 
 ## Usage
 
