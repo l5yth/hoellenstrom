@@ -141,63 +141,13 @@
   <div class="site-label">Alte Hölle, Brandenburg · DWeb Camp 2026 · rev 0.4 — annotated calculations</div>
   <h1>⚡ Power Plan</h1>
   <div class="subtitle">850 people · E.DIS 250kVA grid + 40kVA on-site gen · talks, workshops, hacking program</div>
-  <div style="margin-top:.8rem">
+  <div style="margin-top:.8rem;text-align:right">
     <a class="gh-badge" href="https://github.com/l5yth/hoellenstrom" target="_blank" rel="noopener">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       l5yth/hoellenstrom
     </a>
   </div>
 </header>
-
-<!-- ══════════════════════════════════════════
-     MATH REFERENCE
-══════════════════════════════════════════ -->
-<section>
-<h2>Math Reference — Formulas Used Throughout</h2>
-<p class="muted">Every number in this document derives from one or more of the following four formulas. Annotations in each section show the substituted values.</p>
-
-<div class="math-ref">
-  <div class="math-ref-title">① Apparent Power (kVA) from 3-phase current</div>
-  <div class="math-formula">S = √3 × U<sub>L</sub> × I   [VA]</div>
-  <div class="math-comment">U<sub>L</sub> = line-to-line voltage = 400 V (Germany, 3-phase) · I = line current in Amperes</div>
-  <div class="math-comment">√3 ≈ 1.732 — arises because 3-phase line voltage is √3 times the phase voltage</div>
-</div>
-
-<div class="math-ref">
-  <div class="math-ref-title">② Active Power (kW) from apparent power</div>
-  <div class="math-formula">P = S × cos φ   [W]</div>
-  <div class="math-comment">cos φ = power factor. Resistive loads (heaters) = 1.0. Inductive (motors) ≈ 0.7–0.85.</div>
-  <div class="math-comment">Event electronics (laptops, chargers, LED drivers, PA amplifiers): cos φ ≈ 0.85–0.95.</div>
-  <div class="math-comment">This plan uses <strong>cos φ = 0.90</strong> as the working assumption for mixed event electronics.</div>
-  <div class="math-comment">Important: S (kVA) is what the fuse/cable sees. P (kW) is what the equipment actually uses.</div>
-</div>
-
-<div class="math-ref">
-  <div class="math-ref-title">③ Voltage drop over a 3-phase cable run</div>
-  <div class="math-formula">ΔU (V) = √3 × I × L × (ρ / A)</div>
-  <div class="math-comment">I = current [A] · L = one-way cable length [m] · ρ = resistivity of copper = 0.0175 Ω·mm²/m</div>
-  <div class="math-comment">A = cable cross-section [mm²] · ΔU% = (ΔU / 400V) × 100</div>
-  <div class="math-comment">VDE 0100-718 (temporary event installations): recommended ΔU ≤ 5% for the full circuit.</div>
-  <div class="math-comment">Note: modern switching power supplies (laptops, chargers, LED drivers) tolerate ΔU up to ~15%</div>
-  <div class="math-comment">because they operate on 100–240V AC. Analogue audio and older equipment is more sensitive.</div>
-</div>
-
-<div class="math-ref">
-  <div class="math-ref-title">④ Diversity factor — realistic load from rated capacity</div>
-  <div class="math-formula">P<sub>actual</sub> = P<sub>installed</sub> × d</div>
-  <div class="math-comment">d = diversity factor: the fraction of installed capacity drawing power simultaneously.</div>
-  <div class="math-comment">Camping loads (phone chargers, laptop chargers): d ≈ 0.15–0.20</div>
-  <div class="math-comment">Event tents (talks, PA, lighting running together): d ≈ 0.70–0.85</div>
-  <div class="math-comment">Glamping tents (small appliances, evening peak): d ≈ 0.25–0.40</div>
-</div>
-
-<div class="notice info-notice">
-  <strong>Note on the "22kW for 32A" figure used in earlier revisions (rev 0.1–0.3)</strong>
-  That figure was S (apparent power) = √3 × 400V × 32A = 22.2 kVA, not P (active watts).
-  Corrected: at cos φ = 0.90, P = 22.2 kVA × 0.90 = <strong>20.0 kW</strong> usable per 32A 3-phase circuit.
-  At cos φ = 0.80 (conservative): P = 22.2 × 0.80 = 17.8 kW. All area calculations in this revision use cos φ = 0.90.
-</div>
-</section>
 
 <!-- ══════════════════════════════════════════
      GRID TOPOLOGY
@@ -915,6 +865,49 @@
     </tr>
   </tbody>
 </table>
+</section>
+
+<!-- ══════════════════════════════════════════
+     MATH REFERENCE
+══════════════════════════════════════════ -->
+<section>
+<h2>Math Reference — Formulas Used Throughout</h2>
+<p class="muted">Every number in this document derives from one or more of the following four formulas. Annotations in each section show the substituted values.</p>
+
+<div class="math-ref">
+  <div class="math-ref-title">① Apparent Power (kVA) from 3-phase current</div>
+  <div class="math-formula">S = √3 × U<sub>L</sub> × I   [VA]</div>
+  <div class="math-comment">U<sub>L</sub> = line-to-line voltage = 400 V (Germany, 3-phase) · I = line current in Amperes</div>
+  <div class="math-comment">√3 ≈ 1.732 — arises because 3-phase line voltage is √3 times the phase voltage</div>
+</div>
+
+<div class="math-ref">
+  <div class="math-ref-title">② Active Power (kW) from apparent power</div>
+  <div class="math-formula">P = S × cos φ   [W]</div>
+  <div class="math-comment">cos φ = power factor. Resistive loads (heaters) = 1.0. Inductive (motors) ≈ 0.7–0.85.</div>
+  <div class="math-comment">Event electronics (laptops, chargers, LED drivers, PA amplifiers): cos φ ≈ 0.85–0.95.</div>
+  <div class="math-comment">This plan uses <strong>cos φ = 0.90</strong> as the working assumption for mixed event electronics.</div>
+  <div class="math-comment">Important: S (kVA) is what the fuse/cable sees. P (kW) is what the equipment actually uses.</div>
+</div>
+
+<div class="math-ref">
+  <div class="math-ref-title">③ Voltage drop over a 3-phase cable run</div>
+  <div class="math-formula">ΔU (V) = √3 × I × L × (ρ / A)</div>
+  <div class="math-comment">I = current [A] · L = one-way cable length [m] · ρ = resistivity of copper = 0.0175 Ω·mm²/m</div>
+  <div class="math-comment">A = cable cross-section [mm²] · ΔU% = (ΔU / 400V) × 100</div>
+  <div class="math-comment">VDE 0100-718 (temporary event installations): recommended ΔU ≤ 5% for the full circuit.</div>
+  <div class="math-comment">Note: modern switching power supplies (laptops, chargers, LED drivers) tolerate ΔU up to ~15%</div>
+  <div class="math-comment">because they operate on 100–240V AC. Analogue audio and older equipment is more sensitive.</div>
+</div>
+
+<div class="math-ref">
+  <div class="math-ref-title">④ Diversity factor — realistic load from rated capacity</div>
+  <div class="math-formula">P<sub>actual</sub> = P<sub>installed</sub> × d</div>
+  <div class="math-comment">d = diversity factor: the fraction of installed capacity drawing power simultaneously.</div>
+  <div class="math-comment">Camping loads (phone chargers, laptop chargers): d ≈ 0.15–0.20</div>
+  <div class="math-comment">Event tents (talks, PA, lighting running together): d ≈ 0.70–0.85</div>
+  <div class="math-comment">Glamping tents (small appliances, evening peak): d ≈ 0.25–0.40</div>
+</div>
 </section>
 
 <footer>
