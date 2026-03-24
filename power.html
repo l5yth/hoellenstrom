@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DWeb Camp 2026 — Power Plan rev 0.4</title>
+<title>DWeb Camp 2026 ⚡ Power Plan rev 0.4</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
   :root {
@@ -138,8 +138,8 @@
 <body>
 
 <header>
-  <div class="site-label">Alte Hölle, Brandenburg · DWeb Camp 2026 · rev 0.4 — annotated calculations</div>
-  <h1>⚡ Power Plan</h1>
+  <div class="site-label">Alte Hölle, Brandenburg · DWeb Camp 2026 · rev 0.4 - annotated calculations</div>
+  <h1>DWeb Camp 2026 ⚡ Power Plan</h1>
   <div class="subtitle">850 people · E.DIS 250kVA grid + 40kVA on-site gen · talks, workshops, hacking program</div>
   <div style="margin-top:.8rem;text-align:right">
     <a class="gh-badge" href="https://github.com/l5yth/hoellenstrom" target="_blank" rel="noopener">
@@ -153,11 +153,11 @@
      GRID TOPOLOGY
 ══════════════════════════════════════════ -->
 <section>
-<h2>Grid Topology — From Transformer to Site</h2>
+<h2>Grid Topology - From Transformer to Site</h2>
 
 <div class="hub-grid">
   <div class="hub primary">
-    <div class="hub-name">🟢 Rosa Haus — Primary Hub</div>
+    <div class="hub-name">🟢 Rosa Haus - Primary Hub</div>
     <div class="hub-spec">NAYY 4×240 · 80m · 250A · new installation</div>
     <div class="hub-kva">154 kVA</div>
     <div class="ann" style="margin:.5rem 0 .7rem">
@@ -170,7 +170,7 @@
     <div class="hub-row"><span>Rote Scheune (barn)</span><span>NAYY 5×35 · 25m · 35A</span></div>
   </div>
   <div class="hub secondary">
-    <div class="hub-name">🟡 Gasthaus — Secondary Hub</div>
+    <div class="hub-name">🟡 Gasthaus - Secondary Hub</div>
     <div class="hub-spec">NAYY 4×120 · 220m · 125A · old installation · 40kVA gen backup</div>
     <div class="hub-kva" style="color:var(--warn)">69 kVA</div>
     <div class="ann" style="margin:.5rem 0 .7rem">
@@ -181,7 +181,7 @@
     </div>
     <div class="hub-row"><span>Generator Garage (backup/standalone)</span><span>NAYY 4×50 · 50m · 80A</span></div>
     <div class="hub-row"><span>Bier Scheune</span><span>NAYY 4×25 · 50m · 35A</span></div>
-    <div class="hub-row"><span>Hotel</span><span>NAYY 4×25 · 175m · 50A</span></div>
+    <div class="hub-row"><span>Hotel</span><span>NAYY 4×25 · 50A</span></div>
     <div class="hub-row"><span>Heizhaus (Infra)</span><span>NAYY 4×25 · 80m · 63A</span></div>
     <div class="hub-row" style="padding-left:.8rem"><span>↳ Pool area (outside)</span><span>NAYY 4×50 · 90m · 35A</span></div>
   </div>
@@ -200,7 +200,7 @@
     </tr>
     <tr>
       <td class="bold">Rote Scheune</td>
-      <td class="mono muted">NAYY 5×35 · 25m</td>
+      <td class="mono muted">NAYY 5×35 · 25m · from Rosa Haus</td>
       <td class="mono">35A</td>
       <td>CEE 32A · CEE 16A · Schuko 16A</td>
       <td class="mono">24.2 kVA</td>
@@ -224,7 +224,7 @@
     </tr>
     <tr>
       <td class="bold">Bier Scheune</td>
-      <td class="mono muted">NAYY 4×25 · 50m</td>
+      <td class="mono muted">NAYY 4×25 · 50m · from Gasthaus</td>
       <td class="mono">35A</td>
       <td>CEE 16A · 2×Schuko 10A (collection pit)</td>
       <td class="mono">24.2 kVA</td>
@@ -232,7 +232,7 @@
     </tr>
     <tr>
       <td class="bold">Hotel</td>
-      <td class="mono muted">NAYY 4×25 · 175m</td>
+      <td class="mono muted">NAYY 4×25 · 15m · from Gasthaus</td>
       <td class="mono">50A</td>
       <td>Building outlets; Sauna 14kVA as dedicated load</td>
       <td class="mono">34.6 kVA</td>
@@ -240,7 +240,7 @@
     </tr>
     <tr>
       <td class="bold">Heizhaus (Infra)</td>
-      <td class="mono muted">NAYY 4×25 · 80m</td>
+      <td class="mono muted">NAYY 4×25 · 80m · from Gasthaus</td>
       <td class="mono">63A</td>
       <td>CEE 32A · CEE 16A (well + heating priority)</td>
       <td class="mono">43.6 kVA</td>
@@ -308,7 +308,7 @@
 </div>
 <div class="notice warn-notice">
   <strong>⚠ Gasthaus hub contention at peak.</strong>
-  The Gasthaus side carries: hacker tent + forest stage + pool area + main stage + food/bar simultaneously. At peak these sum to ~90 kW — above the 62.1 kW hub limit. Mitigation: run on-site 40 kVA gen standalone for the hacker tent, removing ~20 kW from the Gasthaus hub and bringing it to ~70 kW, still close but manageable if program peaks don't fully overlap.
+  The Gasthaus side carries: hacker tent + forest stage + pool area + main stage + food/bar simultaneously. At peak these sum to ~90 kW - above the 62.1 kW hub limit. Mitigation: run on-site 40 kVA gen standalone for the hacker tent, removing ~20 kW from the Gasthaus hub and bringing it to ~70 kW, still close but manageable if program peaks don't fully overlap.
 </div>
 </section>
 
@@ -316,7 +316,7 @@
      AREA BY AREA
 ══════════════════════════════════════════ -->
 <section>
-<h2>Distribution Plan — Area by Area</h2>
+<h2>Distribution Plan - Area by Area</h2>
 
 <!-- GLAMPING -->
 <div class="area util">
@@ -328,7 +328,7 @@
     <div class="area-kw kw-ok">13–25 kW<span class="unit">typ</span></div>
   </div>
   <div class="area-body">
-    Source: <strong>Rosa Haus — 2×32A (3-phase CEE 5-pin)</strong> = two independent supply circuits to vendor distribution box.
+    Source: <strong>Rosa Haus - 2×32A (3-phase CEE 5-pin)</strong> = two independent supply circuits to vendor distribution box.
   </div>
   <div class="ann">
     <span class="note">Per circuit: ① S = √3 × 400V × 32A = 22.2 kVA  ② P = 22.2 × 0.90 = <strong>20.0 kW</strong></span>
@@ -348,7 +348,7 @@
     <div class="area-kw kw-ok">10–18 kW<span class="unit">typ</span></div>
   </div>
   <div class="area-body">
-    Source: <strong>Rosa Haus — 1×32A (3-phase)</strong> to central distribution board, then 10 poles with 2–4×Schuko 16A, one RCD per pole.
+    Source: <strong>Rosa Haus - 1×32A (3-phase)</strong> to central distribution board, then 10 poles with 2–4×Schuko 16A, one RCD per pole.
   </div>
   <div class="ann">
     <span class="note">Circuit: S = 22.2 kVA · P = 22.2 × 0.90 = <strong>20.0 kW ceiling</strong></span>
@@ -363,7 +363,7 @@
       <span class="step">At 10mm²: ΔU = 1.732 × 32 × 350 × 0.00175 = <strong>33.9V = 8.5%</strong>   marginal for sensitive equipment</span>
       <span class="step">At 16mm²: ΔU = 1.732 × 32 × 350 × 0.00109 = <strong>21.2V = 5.3%</strong>   ✓ within VDE 5% guideline at rated current</span>
       <span class="step">At 16mm² with typical load (I = 14A): ΔU = 1.732 × 14 × 350 × 0.00109 = <strong>9.3V = 2.3%</strong>  ✓</span>
-      <span class="note">Answer to your question: 6mm² is not sufficient for 350m. 16mm² is the minimum. To answer on 250m (glamping): same result — 16mm² needed there too (see glamping cable run calculation).</span>
+      <span class="note">Answer to your question: 6mm² is not sufficient for 350m. 16mm² is the minimum. To answer on 250m (glamping): same result - 16mm² needed there too (see glamping cable run calculation).</span>
     </div>
   </div>
 </div>
@@ -372,13 +372,13 @@
 <div class="area util">
   <div class="area-head">
     <div>
-      <div class="area-title">Small Camp — Chillout + 2×Theme Tents</div>
+      <div class="area-title">Small Camp - Chillout + 2×Theme Tents</div>
       <div class="area-sub">3 structures · kleine Zeltwiese · ~100 m from Rosa Haus</div>
     </div>
     <div class="area-kw kw-ok">9–15 kW<span class="unit">typ</span></div>
   </div>
   <div class="area-body">
-    Source: <strong>Rosa Haus — 1×32A (3-phase)</strong>, via small distribution board shared across all three structures.
+    Source: <strong>Rosa Haus - 1×32A (3-phase)</strong>, via small distribution board shared across all three structures.
   </div>
   <div class="ann">
     <span class="note">Circuit ceiling: P = 22.2 kVA × 0.90 = <strong>20.0 kW</strong></span>
@@ -398,7 +398,7 @@
     <div class="area-kw kw-ok">10–14 kW<span class="unit">combined</span></div>
   </div>
   <div class="area-body">
-    Source: <strong>Gasthaus — 1×32A (3-phase), ~200 m run</strong>. Y-distribution board at midpoint: one branch to forest stage, one branch as CEE 16A to party sound system. Preferred routing: east side of road (same side as forest), avoids road crossing. H07RN-F outdoor cable.
+    Source: <strong>Gasthaus - 1×32A (3-phase), ~200 m run</strong>. Y-distribution board at midpoint: one branch to forest stage, one branch as CEE 16A to party sound system. Preferred routing: east side of road (same side as forest), avoids road crossing. H07RN-F outdoor cable.
   </div>
   <div class="ann">
     <span class="note">Supply: S = 22.2 kVA · P = 20.0 kW ceiling</span>
@@ -414,7 +414,7 @@
 <div class="area util">
   <div class="area-head">
     <div>
-      <div class="area-title">Pool Area — 4×50m² Tents + 8m Dome</div>
+      <div class="area-title">Pool Area - 4×50m² Tents + 8m Dome</div>
       <div class="area-sub">5 structures · talks, workshops, events · existing pool outside outlets</div>
     </div>
     <div class="area-kw kw-mid">15–22 kW<span class="unit">at ceiling</span></div>
@@ -427,7 +427,7 @@
     <span class="note">Outlet total: 1×CEE32A (20 kW) + 3×CEE16A (3×3.7 = 11.1 kW) + Schuko 16A (2.3 kW) = 33.4 kW theoretical</span>
     <span class="step">Feeder limit (21.8 kW) overrides all outlet ratings. The sub-board fuse at 35A enforces this.</span>
     <span class="note">Per structure (talks/workshop load): PA 2–3 kW + projection 1 kW + LED lighting 1–2 kW + misc 0.5 kW = 4.5–6.5 kW</span>
-    <span class="step">5 structures × 5 kW avg = 25 kW installed · d ≈ 0.80 → <strong>20 kW typical</strong> — right at feeder ceiling</span>
+    <span class="step">5 structures × 5 kW avg = 25 kW installed · d ≈ 0.80 → <strong>20 kW typical</strong> - right at feeder ceiling</span>
     <span class="note">⚠ No margin for high-draw extras here. No catering equipment, no high-wattage equipment on this circuit.</span>
   </div>
 </div>
@@ -503,7 +503,7 @@
     <div class="area-kw kw-ok">9–20 kW<span class="unit">typ</span></div>
   </div>
   <div class="area-body">
-    Source: <strong>Gasthaus — 32A CEE (3-phase), ~100 m direct run</strong>. Gasthaus 32A outlet confirmed present. If Gasthaus 32A is needed for forest run, alternate: 40 kVA on-site generator in standalone mode (same cable spec, generator CEE 32A output used directly).
+    Source: <strong>Gasthaus - 32A CEE (3-phase), ~100 m direct run</strong>. Gasthaus 32A outlet confirmed present. If Gasthaus 32A is needed for forest run, alternate: 40 kVA on-site generator in standalone mode (same cable spec, generator CEE 32A output used directly).
   </div>
   <div class="ann">
     <span class="note">Circuit: S = 22.2 kVA · P = 20.0 kW ceiling</span>
@@ -540,7 +540,7 @@
 </section>
 
 <!-- ══════════════════════════════════════════
-     CABLE RUNS — FULL VOLTAGE DROP
+     CABLE RUNS - FULL VOLTAGE DROP
 ══════════════════════════════════════════ -->
 <section>
 <h2>Cable Run Calculations</h2>
@@ -548,7 +548,7 @@
 
 <div class="notice warn-notice">
   <strong>⚠ Cable sizing correction vs. earlier revisions (0.1–0.3)</strong>
-  Previous revisions recommended 6mm² for the glamping run (250m) and suggested 6mm² for self-camping. The voltage drop calculation below shows that 16mm² is the correct specification for both long runs. 6mm² gives 14.1% drop at rated current over 350m — well above VDE limits.
+  Previous revisions recommended 6mm² for the glamping run (250m) and suggested 6mm² for self-camping. The voltage drop calculation below shows that 16mm² is the correct specification for both long runs. 6mm² gives 14.1% drop at rated current over 350m - well above VDE limits.
 </div>
 
 <table>
@@ -606,7 +606,7 @@
   </tbody>
 </table>
 
-<h3>Voltage Drop Calculations — Step by Step</h3>
+<h3>Voltage Drop Calculations - Step by Step</h3>
 
 <div class="ann">
   <span class="note">Formula: ΔU (V) = √3 × I × L × (ρ/A) = 1.732 × I × L × (0.0175/A)   →   ΔU% = ΔU/400V × 100</span>
@@ -624,7 +624,7 @@
   <span class="note"><strong>Run 2: Rosa Haus → Self-Camping  (350m, 32A, 16mm²)</strong></span>
   <span class="step">ΔU = 1.732 × 32 × 350 × (0.0175 / 16) = 1.732 × 32 × 350 × 0.001094</span>
   <span class="step">= 1.732 × 32 × 0.3828 = 1.732 × 12.25 = <strong>21.2 V</strong></span>
-  <span class="result">ΔU% = 21.2 / 400 × 100 = <strong>5.3%</strong>  — marginally above 5% VDE guideline at full rated current</span>
+  <span class="result">ΔU% = 21.2 / 400 × 100 = <strong>5.3%</strong>  - marginally above 5% VDE guideline at full rated current</span>
   <span class="note">At typical I = 14A: ΔU = 1.732 × 14 × 350 × 0.001094 = 9.3V = <strong>2.3%</strong>  ✓</span>
   <span class="note">The 5.3% overshoot occurs only at full 32A. Camping loads rarely reach full rated current (diversity d ≈ 0.15).</span>
   <span class="note">For strict compliance at rated current: use 25mm² → ΔU = 1.732 × 32 × 350 × (0.0175/25) = 13.6V = <strong>3.4%</strong>  ✓</span>
@@ -633,7 +633,7 @@
 
 <div class="ann">
   <span class="note"><strong>Run 3: Rosa Haus → Small Camp Tents  (100m, 32A)</strong></span>
-  <span class="step">At 4mm²: ΔU = 1.732 × 32 × 100 × (0.0175/4) = 1.732 × 32 × 0.4375 = <strong>24.2V = 6.1%</strong>  — above 5%</span>
+  <span class="step">At 4mm²: ΔU = 1.732 × 32 × 100 × (0.0175/4) = 1.732 × 32 × 0.4375 = <strong>24.2V = 6.1%</strong>  - above 5%</span>
   <span class="step">At 6mm²: ΔU = 1.732 × 32 × 100 × (0.0175/6) = 1.732 × 32 × 0.2917 = <strong>16.1V = 4.0%</strong>  ✓</span>
   <span class="result">Use 6mm² for strict compliance. 4mm² is acceptable at typical load (I ≈ 14A → ΔU = 10.6V = 2.6%).</span>
 </div>
@@ -670,14 +670,14 @@
   <div class="ann">
     <span class="note">P = 40 kVA × cos φ 0.90 = <strong>36 kW</strong> available at generator outputs</span>
     <span class="note">CEE 32A output: S = 22.2 kVA · P = 20 kW · CEE 16A × 2: P = 3.3 kW each · Schuko: P = 2.3 kW</span>
-    <span class="step">Standalone for hacker tent: 20 kW available via CEE 32A — sufficient for 9–20 kW hacker tent load</span>
+    <span class="step">Standalone for hacker tent: 20 kW available via CEE 32A - sufficient for 9–20 kW hacker tent load</span>
   </div>
 </div>
 
 <div class="area" style="border-left:3px solid #e8453c;background:var(--surface)">
   <div class="area-head">
     <div>
-      <div class="area-title">Rental ~50 kVA Silent Generator — Camper Parking</div>
+      <div class="area-title">Rental ~50 kVA Silent Generator - Camper Parking</div>
       <div class="area-sub">25-slot CEE 16A distribution board · silent canopy · overnight operation</div>
     </div>
     <div class="area-kw" style="color:#e8453c">45 kW</div>
@@ -806,10 +806,10 @@
 </table>
 
 <div class="ann">
-  <span class="note"><strong>Hub check — Gasthaus (recommended: hacker tent on gen):</strong></span>
+  <span class="note"><strong>Hub check - Gasthaus (recommended: hacker tent on gen):</strong></span>
   <span class="step">Gasthaus available: 69 kVA × 0.90 = 62.1 kW</span>
   <span class="step">Gasthaus load (excl. hacker tent): forest 14 + pool 22 + food 9 + bier 5 + stage 22 = 72 kW peak</span>
-  <span class="note">72 kW peak exceeds 62.1 kW hub capacity — but these peaks don't all coincide simultaneously.</span>
+  <span class="note">72 kW peak exceeds 62.1 kW hub capacity - but these peaks don't all coincide simultaneously.</span>
   <span class="step">Typical Gasthaus load: 10 + 20 + 5 + 3 + 14 = 52 kW → within 62.1 kW ✓</span>
   <span class="note">Evening peak risk: all areas active simultaneously for ~2–3h. 40 kVA gen (36 kW) can supplement Gasthaus hub during this window if switched to backup mode.</span>
 </div>
@@ -825,7 +825,7 @@
   <tbody>
     <tr>
       <td class="mono muted">1</td>
-      <td><strong>Hacker tent source decision:</strong> Gasthaus 32A (100m, 6mm²) or 40 kVA gen standalone. Gen standalone preferred — removes hacker tent load from Gasthaus hub entirely, leaving gen available as backup for Gasthaus during evening peaks.</td>
+      <td><strong>Hacker tent source decision:</strong> Gasthaus 32A (100m, 6mm²) or 40 kVA gen standalone. Gen standalone preferred - removes hacker tent load from Gasthaus hub entirely, leaving gen available as backup for Gasthaus during evening peaks.</td>
       <td><span class="badge b-crit">CRITICAL</span></td>
     </tr>
     <tr>
@@ -835,7 +835,7 @@
     </tr>
     <tr>
       <td class="mono muted">3</td>
-      <td><strong>Cable procurement — correct specs:</strong><br>
+      <td><strong>Cable procurement - correct specs:</strong><br>
         Glamping run: <strong>2×16mm² H07RN-F, 250m each</strong><br>
         Self-camping run: <strong>1×16mm² H07RN-F, 350m</strong> (or 25mm² for strict compliance at rated current)<br>
         Forest run: <strong>1×16mm² H07RN-F, 200m</strong><br>
@@ -845,7 +845,7 @@
     </tr>
     <tr>
       <td class="mono muted">4</td>
-      <td><strong>50 kVA silent generator rental</strong> for camper parking. Lock in early — silent canopy units book out ahead of summer season in Brandenburg.</td>
+      <td><strong>50 kVA silent generator rental</strong> for camper parking. Lock in early - silent canopy units book out ahead of summer season in Brandenburg.</td>
       <td><span class="badge b-warn">HIGH</span></td>
     </tr>
     <tr>
@@ -855,7 +855,7 @@
     </tr>
     <tr>
       <td class="mono muted">6</td>
-      <td><strong>Self-camping 350m run:</strong> Discuss with electrician whether 16mm² (5.3% at full load) is acceptable or if 25mm² is required. Load type (phone/laptop chargers, LED) is very tolerant — 16mm² is practically fine.</td>
+      <td><strong>Self-camping 350m run:</strong> Discuss with electrician whether 16mm² (5.3% at full load) is acceptable or if 25mm² is required. Load type (phone/laptop chargers, LED) is very tolerant - 16mm² is practically fine.</td>
       <td><span class="badge b-warn">HIGH</span></td>
     </tr>
     <tr>
@@ -871,14 +871,14 @@
      MATH REFERENCE
 ══════════════════════════════════════════ -->
 <section>
-<h2>Math Reference — Formulas Used Throughout</h2>
+<h2>Math Reference - Formulas Used Throughout</h2>
 <p class="muted">Every number in this document derives from one or more of the following four formulas. Annotations in each section show the substituted values.</p>
 
 <div class="math-ref">
   <div class="math-ref-title">① Apparent Power (kVA) from 3-phase current</div>
   <div class="math-formula">S = √3 × U<sub>L</sub> × I   [VA]</div>
   <div class="math-comment">U<sub>L</sub> = line-to-line voltage = 400 V (Germany, 3-phase) · I = line current in Amperes</div>
-  <div class="math-comment">√3 ≈ 1.732 — arises because 3-phase line voltage is √3 times the phase voltage</div>
+  <div class="math-comment">√3 ≈ 1.732 - arises because 3-phase line voltage is √3 times the phase voltage</div>
 </div>
 
 <div class="math-ref">
@@ -901,7 +901,7 @@
 </div>
 
 <div class="math-ref">
-  <div class="math-ref-title">④ Diversity factor — realistic load from rated capacity</div>
+  <div class="math-ref-title">④ Diversity factor - realistic load from rated capacity</div>
   <div class="math-formula">P<sub>actual</sub> = P<sub>installed</sub> × d</div>
   <div class="math-comment">d = diversity factor: the fraction of installed capacity drawing power simultaneously.</div>
   <div class="math-comment">Camping loads (phone chargers, laptop chargers): d ≈ 0.15–0.20</div>
@@ -911,7 +911,7 @@
 </section>
 
 <footer>
-  DWeb Camp 2026 Power Plan · rev 0.4 · Alte Hölle, Brandenburg · For planning purposes only.<br>
+  DWeb Camp 2026 ⚡ Power Plan · rev 0.4 · Alte Hölle, Brandenburg · For planning purposes only.<br>
   All temporary event installations require a qualified Elektrofachkraft (EFK) per VDE 0100-718 and DGUV V3 inspection before energisation.<br>
   Generator overnight: confirm noise/emissions requirements with Forstamt Brandenburg.
 </footer>
