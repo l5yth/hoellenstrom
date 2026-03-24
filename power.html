@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alte Hölle — Power Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d0f0e;
+    --surface: #141714;
+    --border: #2a2e2b;
+    --accent: #7cfc6e;
+    --accent-dim: #3a6e33;
+    --warn: #f5a623;
+    --danger: #e8453c;
+    --text: #cdd5c8;
+    --muted: #6b7568;
+    --gen: #e8453c;
+    --util: #7cfc6e;
+    --hybrid: #f5a623;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .site-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 0.3rem;
+  }
+
+  h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--accent-dim);
+  }
+
+  section { margin-bottom: 2.5rem; }
+
+  /* Assumptions box */
+  .assumptions {
+    background: #0a1309;
+    border: 1px solid var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.2rem;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .assumptions strong { color: var(--text); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.4rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #1c201d;
+  }
+  tbody tr:hover { background: #161b16; }
+
+  td {
+    padding: 0.55rem 0.8rem;
+    vertical-align: top;
+  }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .bold { font-weight: 600; }
+
+  /* Power source type badges */
+  .badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+  .badge-util { background: #1a3318; color: var(--util); }
+  .badge-gen  { background: #2e100e; color: var(--gen); }
+  .badge-hybrid { background: #2e1f07; color: var(--warn); }
+
+  /* kW values */
+  .kw-low  { color: var(--util); font-family: 'IBM Plex Mono', monospace; }
+  .kw-mid  { color: var(--warn); font-family: 'IBM Plex Mono', monospace; }
+  .kw-high { color: var(--gen);  font-family: 'IBM Plex Mono', monospace; }
+
+  /* Summary boxes */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .summary-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    border-radius: 2px;
+  }
+
+  .summary-box .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .summary-box .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .summary-box .unit {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  .summary-box .note { font-size: 11px; color: var(--muted); margin-top: 0.3rem; }
+
+  /* Source map visual */
+  .source-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .source-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .source-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .source-spec {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .source-kw {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Area plan cards */
+  .area-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.7rem;
+    border-radius: 2px;
+    display: grid;
+    grid-template-columns: 220px 1fr auto;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .area-card.gen    { border-left: 3px solid var(--gen); }
+  .area-card.util   { border-left: 3px solid var(--util); }
+  .area-card.hybrid { border-left: 3px solid var(--warn); }
+
+  .area-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+
+  .area-detail { font-size: 12px; color: var(--muted); }
+
+  .area-source {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .area-kw {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .area-kw .range {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .area-kw .label { font-size: 11px; color: var(--muted); }
+
+  /* Generator recommendations */
+  .gen-card {
+    background: #1a0d0c;
+    border: 1px solid #3d1a18;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.7rem;
+    border-radius: 2px;
+  }
+
+  .gen-card h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gen);
+    margin-bottom: 0.4rem;
+  }
+
+  .gen-card p { font-size: 12px; color: var(--muted); }
+  .gen-card strong { color: var(--text); }
+
+  /* Critical notes */
+  .crit {
+    background: #1a1308;
+    border: 1px solid #4a3010;
+    border-left: 3px solid var(--warn);
+    padding: 0.8rem 1rem;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 0.7rem;
+    border-radius: 2px;
+  }
+  .crit strong { color: var(--warn); }
+
+  /* Capacity bar */
+  .cap-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    overflow: hidden;
+  }
+  .cap-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  @media (max-width: 700px) {
+    .area-card { grid-template-columns: 1fr; }
+    .source-list { grid-template-columns: 1fr; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="site-label">Alte Hölle, Brandenburg · Power Planning Document · rev 0.1</div>
+  <h1>⚡ Power Plan</h1>
+  <div class="subtitle">850 people · remote woodland site · utility + generator hybrid</div>
+</header>
+
+<div class="assumptions">
+  <strong>Key assumptions —</strong>
+  All 32A connections assumed 3-phase CEE (Drehstrom 400V): 32A×400V×√3 ≈ <strong>22kW</strong> max, ~18kW usable (cos φ 0.8).
+  16A assumed single-phase 230V: ≈ <strong>3.7kW</strong>.
+  63A assumed 3-phase: ≈ <strong>44kW</strong>.
+  If any 32A connections are single-phase only (230V), capacity drops to ~7.4kW per circuit — verify with site owner.
+  Diversity factors applied to camping loads (0.2–0.3). Stage/PA loads taken at 80% of rated.
+</div>
+
+<!-- SUMMARY -->
+<section>
+  <h2>Overall Budget</h2>
+  <div class="summary-grid">
+    <div class="summary-box">
+      <div class="label">Total Utility Available</div>
+      <div class="value" style="color:var(--util)">~348<span class="unit">kW</span></div>
+      <div class="note">All grid connections combined</div>
+    </div>
+    <div class="summary-box">
+      <div class="label">Estimated Peak Load</div>
+      <div class="value" style="color:var(--gen)">~420<span class="unit">kW</span></div>
+      <div class="note">Peak simultaneous draw</div>
+    </div>
+    <div class="summary-box">
+      <div class="label">Estimated Average Load</div>
+      <div class="value" style="color:var(--warn)">~280<span class="unit">kW</span></div>
+      <div class="note">Realistic operational load</div>
+    </div>
+    <div class="summary-box">
+      <div class="label">Generator Required</div>
+      <div class="value" style="color:var(--gen)">3<span class="unit">units</span></div>
+      <div class="note">100kVA + 100kVA + 50kVA</div>
+    </div>
+  </div>
+
+  <div class="crit">
+    <strong>⚠ Capacity gap:</strong> Peak load exceeds total utility by ~70kW. Generators are mandatory for main stage, circus tent, and camper van parking — not optional.
+  </div>
+  <div class="crit">
+    <strong>⚠ Electric showers are a shock load:</strong> Instant-on electric showers draw 6–9kW each. 6–8 units running simultaneously = 36–72kW — dedicating the 63A circuit from the pink house to shower supply alone is the safest option.
+  </div>
+  <div class="crit">
+    <strong>⚠ Verify 3-phase availability:</strong> If the pink house only has single-phase 32A outlets (Schuko or CEE 3-pin), usable power drops from 219kW to ~80kW. This changes everything.
+  </div>
+</section>
+
+<!-- POWER SOURCES -->
+<section>
+  <h2>Available Power Sources</h2>
+  <div class="source-list">
+    <div class="source-row">
+      <div>
+        <div class="source-name">Pink House</div>
+        <div class="source-spec">8×32A (3ph) + 63A (3ph)</div>
+      </div>
+      <div class="source-kw">~219 kW</div>
+    </div>
+    <div class="source-row">
+      <div>
+        <div class="source-name">Red Barn</div>
+        <div class="source-spec">32A (3ph) + 16A (1ph)</div>
+      </div>
+      <div class="source-kw">~26 kW</div>
+    </div>
+    <div class="source-row">
+      <div>
+        <div class="source-name">Pool Area</div>
+        <div class="source-spec">2×16A (1ph) + 32A (3ph)</div>
+      </div>
+      <div class="source-kw">~29 kW</div>
+    </div>
+    <div class="source-row">
+      <div>
+        <div class="source-name">Guest House</div>
+        <div class="source-spec">32A (3ph)</div>
+      </div>
+      <div class="source-kw">~22 kW</div>
+    </div>
+    <div class="source-row">
+      <div>
+        <div class="source-name">Beer Barn</div>
+        <div class="source-spec">16A (1ph)</div>
+      </div>
+      <div class="source-kw">~3.7 kW</div>
+    </div>
+    <div class="source-row">
+      <div>
+        <div class="source-name">Car Parking</div>
+        <div class="source-spec">16A (1ph) outdoor</div>
+      </div>
+      <div class="source-kw">~3.7 kW</div>
+    </div>
+    <div class="source-row">
+      <div>
+        <div class="source-name">Infrastructure House</div>
+        <div class="source-spec">2×32A (3ph)</div>
+      </div>
+      <div class="source-kw">~44 kW</div>
+    </div>
+    <div class="source-row" style="background:#141f14; border-color:var(--accent-dim)">
+      <div>
+        <div class="source-name" style="color:var(--accent)">TOTAL UTILITY</div>
+        <div class="source-spec">All grid connections</div>
+      </div>
+      <div class="source-kw">~348 kW</div>
+    </div>
+  </div>
+</section>
+
+<!-- AREA-BY-AREA PLAN -->
+<section>
+  <h2>Distribution Plan — Area by Area</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--util)"></div> Utility (grid)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gen)"></div> Generator</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div> Hybrid (grid + gen)</div>
+  </div>
+
+  <!-- GLAMPING -->
+  <div class="area-card hybrid">
+    <div>
+      <div class="area-name">Glamping Area</div>
+      <div class="area-detail">30 tents · ~100 guests · vendor-managed</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Pink House</strong> — 4×32A (3ph) = 88kW supply to vendor distribution box.<br>
+      Vendor distributes 2×32A per tent internally. Long cable run from pink house required (~150–200m, use 6mm² minimum).<br>
+      <span style="color:var(--warn)">Note: 30 tents × 2×32A = 60 circuits theoretical 1,320kW — diversity factor 0.08–0.15 brings realistic load to 60–90kW.</span>
+    </div>
+    <div class="area-kw">
+      <div class="range kw-mid">60–90 kW</div>
+      <div class="label">typical draw</div>
+    </div>
+  </div>
+
+  <!-- SELF CAMPING -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Self-Camping Poles</div>
+      <div class="area-detail">10 poles · up to 300 tents</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Pink House</strong> — 1×32A (3ph) = 22kW to a distribution board, then 10 poles each with 2–4×Schuko 16A outlets (RCD-protected).<br>
+      Realistic: campers charge phones, small lights. Not cooking. Diversity ≈ 0.15.
+    </div>
+    <div class="area-kw">
+      <div class="range kw-low">10–20 kW</div>
+      <div class="label">typical draw</div>
+    </div>
+  </div>
+
+  <!-- SHOWERS -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Shower &amp; Washing Station</div>
+      <div class="area-detail">Between small + large camp</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Pink House — 63A circuit dedicated</strong> (44kW). Run heavy cable (10–16mm²) directly to shower distribution box.<br>
+      Electric showers: 6kW–9kW each. Plan for 6–8 units max simultaneous = 36–54kW.<br>
+      Washing machines: 2kW each. Hot water boiler if any: 3–6kW.<br>
+      <span style="color:var(--gen)">If shower count exceeds 6 units, a 30kVA generator supplement is advisable.</span>
+    </div>
+    <div class="area-kw">
+      <div class="range kw-mid">36–60 kW</div>
+      <div class="label">peak demand</div>
+    </div>
+  </div>
+
+  <!-- SMALL CAMP TENTS -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Small Camp — Chillout + 2×50m² Tents</div>
+      <div class="area-detail">3 structures total</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Pink House</strong> — 1×32A (3ph) shared across all three via small distribution board.<br>
+      Each tent: LED lighting 1–2kW, small PA 1–3kW, misc 1kW = ~3–6kW per tent.
+    </div>
+    <div class="area-kw">
+      <div class="range kw-low">8–15 kW</div>
+      <div class="label">typical draw</div>
+    </div>
+  </div>
+
+  <!-- FOREST LOCATIONS -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Forest — Stage + Party Sound</div>
+      <div class="area-detail">2 locations, separate power needs</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Red Barn</strong> — 32A (3ph) = 22kW to forest stage. Run cable through forest edge (outdoor rated, protected conduit).<br>
+      Forest party sound: Red Barn 16A = 3.7kW — adequate for a sound system without heavy subs.<br>
+      Stage: PA 5–10kW + lights 3–5kW = 8–15kW. Sound system: 3–8kW.<br>
+      <span style="color:var(--warn)">Cable run from red barn to forest: estimate 100–150m. Use 4mm² minimum for 32A.</span>
+    </div>
+    <div class="area-kw">
+      <div class="range kw-low">12–23 kW</div>
+      <div class="label">combined draw</div>
+    </div>
+  </div>
+
+  <!-- POOL AREA -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Pool Area — 4×50m² Tents + Dome</div>
+      <div class="area-detail">Events, workshops, activities</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Pool connections</strong> — 2×16A (1ph) + 32A (3ph) = 29kW total available.<br>
+      Distribute: 32A to largest tent (or distribution board for 2–3 tents), 16A outlets to remaining tents and dome.<br>
+      Each 50m² tent: 3–5kW. Dome: 2–3kW. Total: 5 structures × 3–5kW = 15–25kW.<br>
+      <span style="color:var(--warn)">Pool area is right at capacity limit — no margin for heavy loads. No cooking here.</span>
+    </div>
+    <div class="area-kw">
+      <div class="range kw-mid">15–25 kW</div>
+      <div class="label">combined draw</div>
+    </div>
+  </div>
+
+  <!-- FOOD GARDEN + BAR + COFFEE -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Food Garden + Bar + Coffee Truck</div>
+      <div class="area-detail">Behind pool area</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Guest House</strong> — 32A (3ph) = 22kW.<br>
+      Coffee truck likely self-powered (genset or own connection). If grid-tied: 3–5kW.<br>
+      Bar: refrigeration 1–2kW, lighting 1kW, misc 1kW = 3–4kW.<br>
+      Food garden: depends heavily on cooking method. If electric: 5–15kW.<br>
+      <span style="color:var(--warn)">If full electric cooking, guest house 32A will be tight. Coordinate with food vendors early.</span>
+    </div>
+    <div class="area-kw">
+      <div class="range kw-mid">8–20 kW</div>
+      <div class="label">typical draw</div>
+    </div>
+  </div>
+
+  <!-- BEER BARN -->
+  <div class="area-card util">
+    <div>
+      <div class="area-name">Beer Barn</div>
+      <div class="area-detail">Local service, no heavy loads</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Beer Barn own 16A</strong> = 3.7kW.<br>
+      Sufficient for: lighting, a few taps, POS terminal, phone charging. Not for refrigeration compressors or cooking.
+    </div>
+    <div class="area-kw">
+      <div class="range kw-low">1–3 kW</div>
+      <div class="label">typical draw</div>
+    </div>
+  </div>
+
+  <!-- CIRCUS TENT -->
+  <div class="area-card gen">
+    <div>
+      <div class="area-name">Circus Tent (Hotel Area)</div>
+      <div class="area-detail">Main entertainment, biggest load on site</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>GENERATOR — 100kVA</strong> required.<br>
+      Hotel guest house provides 22kW utility for backline, monitoring, FOH tech. Generator handles PA + lighting rig.<br>
+      Large PA system: 15–30kW. Moving lights + LED wash: 20–40kW. Misc (bar, merchandise): 3–5kW.<br>
+      <span style="color:var(--gen)">No utility circuit on site is sufficient. Do not attempt to run this from grid alone.</span>
+    </div>
+    <div class="area-kw">
+      <div class="range kw-high">40–80 kW</div>
+      <div class="label">peak demand</div>
+    </div>
+  </div>
+
+  <!-- MAIN STAGE -->
+  <div class="area-card hybrid">
+    <div>
+      <div class="area-name">Main Stage (Infrastructure House)</div>
+      <div class="area-detail">Largest stage, far right of site</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>Infra House 2×32A (3ph) = 44kW utility</strong> + <strong>100kVA generator</strong> for PA/lights.<br>
+      Use the 44kW utility for: stage monitoring, backline power, FOH console, tech rider misc.<br>
+      Generator: main PA array, lighting rig.<br>
+      Main PA: 20–40kW. Lights: 15–30kW. Support: 5–10kW.
+    </div>
+    <div class="area-kw">
+      <div class="range kw-high">40–80 kW</div>
+      <div class="label">peak demand</div>
+    </div>
+  </div>
+
+  <!-- CAMPER VANS -->
+  <div class="area-card gen">
+    <div>
+      <div class="area-name">Camper Van Parking</div>
+      <div class="area-detail">~25 vans around hotel</div>
+    </div>
+    <div class="area-source">
+      Source: <strong>GENERATOR — 50kVA</strong> + existing car parking 16A outlet.<br>
+      The single 16A outdoor outlet can serve 1 van. All others need generator-fed hookup poles.<br>
+      Typical van draw: 1–3kW (heating, charging). 25 vans × 2kW average = 50kW. Diversity 0.5 = ~25kW realistic.<br>
+      25×16A hookup poles fed from 50kVA generator with RCD distribution board.
+    </div>
+    <div class="area-kw">
+      <div class="range kw-mid">20–40 kW</div>
+      <div class="label">typical draw</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- GENERATOR REQUIREMENTS -->
+<section>
+  <h2>Generator Requirements</h2>
+
+  <div class="gen-card">
+    <h3>GEN-01 · Main Stage · 100kVA silent</h3>
+    <p>Location: adjacent to infrastructure house. Feeds PA rig and lighting. Utility infra-house circuits handle everything else. <strong>Diesel, silent canopy, 48h+ fuel tank preferred.</strong> Position upwind of stage or in dedicated enclosure.</p>
+  </div>
+
+  <div class="gen-card">
+    <h3>GEN-02 · Circus Tent · 100kVA silent</h3>
+    <p>Location: behind or beside hotel/circus tent. Full PA and lighting load. <strong>Same spec as GEN-01.</strong> Both generators can be sourced from the same rental — negotiate a two-unit deal. Run 12h minimum per night.</p>
+  </div>
+
+  <div class="gen-card">
+    <h3>GEN-03 · Camper Van Parking · 50kVA</h3>
+    <p>Location: camper parking area near hotel. Feeds hookup distribution board for 25 vans. <strong>Silent canopy, 16A CEE outlets on distribution board, one RCD per van.</strong> Can potentially be shared with circus tent via cable if proximity allows — but noise and fuel logistics separate is cleaner.</p>
+  </div>
+
+  <div class="crit">
+    <strong>Optional GEN-04:</strong> If electric shower count exceeds 6 units simultaneously, a 30kVA unit feeding the shower block as supplement to the pink house 63A circuit gives headroom. Assess once shower vendor confirms unit count.
+  </div>
+</section>
+
+<!-- CABLE RUNS -->
+<section>
+  <h2>Notable Cable Runs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>From</th>
+        <th>To</th>
+        <th>Est. Distance</th>
+        <th>Load</th>
+        <th>Min. Cable</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono">Pink House</td>
+        <td class="mono">Glamping distribution box</td>
+        <td class="mono">150–200m</td>
+        <td class="mono kw-mid">4×32A (88kW)</td>
+        <td class="mono">4× 6mm² CEE</td>
+        <td class="muted">Run along road or field edge. Protect with cable ramp where crossed.</td>
+      </tr>
+      <tr>
+        <td class="mono">Pink House</td>
+        <td class="mono">Shower block</td>
+        <td class="mono">~100m</td>
+        <td class="mono kw-mid">63A (44kW)</td>
+        <td class="mono">10–16mm²</td>
+        <td class="muted">Heavy cable, dedicated circuit. Do not share with other loads.</td>
+      </tr>
+      <tr>
+        <td class="mono">Pink House</td>
+        <td class="mono">Self-camping dist. board</td>
+        <td class="mono">100–150m</td>
+        <td class="mono kw-low">1×32A (22kW)</td>
+        <td class="mono">4mm²</td>
+        <td class="muted">Board in center of camping area, then 10 poles via shorter runs.</td>
+      </tr>
+      <tr>
+        <td class="mono">Red Barn</td>
+        <td class="mono">Forest stage</td>
+        <td class="mono">100–200m</td>
+        <td class="mono kw-low">32A (22kW)</td>
+        <td class="mono">4mm²</td>
+        <td class="muted">Outdoor rated H07RN-F. Route through forest edge, no open cable on ground.</td>
+      </tr>
+      <tr>
+        <td class="mono">Guest House</td>
+        <td class="mono">Food garden / bar</td>
+        <td class="mono">~50m</td>
+        <td class="mono kw-low">32A (22kW)</td>
+        <td class="mono">2.5–4mm²</td>
+        <td class="muted">Short run, straightforward.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- LOAD SUMMARY TABLE -->
+<section>
+  <h2>Load Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Area</th>
+        <th>Power Source</th>
+        <th>Min kW</th>
+        <th>Typ kW</th>
+        <th>Peak kW</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="bold">Glamping (30 tents)</td>
+        <td class="mono muted">Pink House 4×32A</td>
+        <td class="mono kw-low">30</td>
+        <td class="mono kw-mid">60</td>
+        <td class="mono kw-high">90</td>
+      </tr>
+      <tr>
+        <td class="bold">Self-camping poles (10)</td>
+        <td class="mono muted">Pink House 1×32A</td>
+        <td class="mono kw-low">5</td>
+        <td class="mono kw-low">12</td>
+        <td class="mono kw-mid">20</td>
+      </tr>
+      <tr>
+        <td class="bold">Shower &amp; Washing</td>
+        <td class="mono muted">Pink House 63A</td>
+        <td class="mono kw-low">10</td>
+        <td class="mono kw-mid">36</td>
+        <td class="mono kw-high">60</td>
+      </tr>
+      <tr>
+        <td class="bold">Small Camp Tents (×3)</td>
+        <td class="mono muted">Pink House 1×32A</td>
+        <td class="mono kw-low">4</td>
+        <td class="mono kw-low">8</td>
+        <td class="mono kw-mid">15</td>
+      </tr>
+      <tr>
+        <td class="bold">Forest Stage + Party</td>
+        <td class="mono muted">Red Barn 32A + 16A</td>
+        <td class="mono kw-low">5</td>
+        <td class="mono kw-low">15</td>
+        <td class="mono kw-mid">23</td>
+      </tr>
+      <tr>
+        <td class="bold">Pool Area (4 tents + dome)</td>
+        <td class="mono muted">Pool connections</td>
+        <td class="mono kw-low">6</td>
+        <td class="mono kw-low">15</td>
+        <td class="mono kw-mid">25</td>
+      </tr>
+      <tr>
+        <td class="bold">Food / Bar / Coffee</td>
+        <td class="mono muted">Guest House 32A</td>
+        <td class="mono kw-low">5</td>
+        <td class="mono kw-low">12</td>
+        <td class="mono kw-mid">20</td>
+      </tr>
+      <tr>
+        <td class="bold">Beer Barn</td>
+        <td class="mono muted">Beer Barn 16A</td>
+        <td class="mono kw-low">1</td>
+        <td class="mono kw-low">2</td>
+        <td class="mono kw-low">3</td>
+      </tr>
+      <tr>
+        <td class="bold">Circus Tent</td>
+        <td class="mono muted">GEN-02 100kVA</td>
+        <td class="mono kw-mid">20</td>
+        <td class="mono kw-high">55</td>
+        <td class="mono kw-high">80</td>
+      </tr>
+      <tr>
+        <td class="bold">Main Stage</td>
+        <td class="mono muted">Infra 2×32A + GEN-01</td>
+        <td class="mono kw-mid">20</td>
+        <td class="mono kw-high">55</td>
+        <td class="mono kw-high">80</td>
+      </tr>
+      <tr>
+        <td class="bold">Camper Vans (25)</td>
+        <td class="mono muted">GEN-03 50kVA</td>
+        <td class="mono kw-low">10</td>
+        <td class="mono kw-mid">25</td>
+        <td class="mono kw-mid">40</td>
+      </tr>
+      <tr style="border-top: 2px solid var(--border)">
+        <td class="bold">TOTAL</td>
+        <td class="muted">Grid ~180kW + Generators ~155kW</td>
+        <td class="mono kw-low bold">116</td>
+        <td class="mono kw-mid bold">295</td>
+        <td class="mono kw-high bold">456</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- OPEN QUESTIONS -->
+<section>
+  <h2>Open Questions / Action Items</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Item</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono muted">1</td>
+        <td>Confirm whether pink house 32A outlets are 3-phase (CEE 5-pin) or single-phase. This changes available power from 219kW to ~80kW.</td>
+        <td><span class="badge badge-gen">CRITICAL</span></td>
+      </tr>
+      <tr>
+        <td class="mono muted">2</td>
+        <td>Confirm exact shower unit count and brand. Instantaneous electric vs. boiler-fed changes load profile dramatically.</td>
+        <td><span class="badge badge-hybrid">HIGH</span></td>
+      </tr>
+      <tr>
+        <td class="mono muted">3</td>
+        <td>Get glamping vendor's actual distribution plan. Their 2×32A per tent spec — are those 3-phase or single-phase circuits?</td>
+        <td><span class="badge badge-hybrid">HIGH</span></td>
+      </tr>
+      <tr>
+        <td class="mono muted">4</td>
+        <td>Food garden cooking method. Gas vs. electric changes guest house load from 8kW to 20kW+.</td>
+        <td><span class="badge badge-util">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td class="mono muted">5</td>
+        <td>Measure actual cable run distances on site. The glamping run in particular may need voltage drop calculation if over 200m.</td>
+        <td><span class="badge badge-util">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td class="mono muted">6</td>
+        <td>Stage PA rider from circus tent and main stage acts. Power requirements vary wildly between acts.</td>
+        <td><span class="badge badge-util">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td class="mono muted">7</td>
+        <td>Forest cable routing: check for permitted tree/root crossings in Brandenburg Naturschutz context.</td>
+        <td><span class="badge badge-util">MEDIUM</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  Alte Hölle Power Plan · rev 0.1 · For planning purposes only. All installations require a qualified Elektrofachkraft (EFK) per VDE 0100 and DGUV V3. Generator operation in woodland: check Forstamt Brandenburg permit requirements.
+</footer>
+
+</body>
+</html>
